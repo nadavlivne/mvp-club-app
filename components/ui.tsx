@@ -55,7 +55,7 @@ export function LineItems({ lines, footer }: { lines: { label: string; amount: n
       {lines.map((l, i) => (
         <div key={i} className="flex justify-between gap-3 text-[15px]">
           <span>{l.label}</span>
-          <span className="font-bold">{money(l.amount)}</span>
+          <span className="font-bold">{l.amount === 0 ? 'Included' : money(l.amount)}</span>
         </div>
       ))}
       {footer}

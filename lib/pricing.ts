@@ -1,5 +1,5 @@
 // Price rules from CLAUDE.md. Amounts always come from the price book.
-import { includedInMembership, membership, replacementCredits } from '@/config/business'
+import { membership, replacementCredits } from '@/config/business'
 import type { Customer, Price, PriceBookRow } from './types'
 
 export const money = (n: number) => '$' + Math.round(n).toLocaleString('en-US')
@@ -30,9 +30,10 @@ export function priceLine(row: PriceBookRow, c: Customer, today = new Date()): P
     }
   }
 
-  const memberPrice = includedInMembership.includes(row.code) ? 0 : row.memberPrice
-  if (c.isMember) return { price: memberPrice, standard, note: 'member price' }
-  return { price: standard, standard, note: `members ${money(memberPrice)}` }
+  // A member price of $0 in the price book means the membership includes it.
+  const memberPrice = row.memberPrice
+  if (c.isMember) return { price: memberPrice, standard, note: memberPrice === 0 ? 'with your membership' : 'member price' }
+  return { price: standard, standard, note: memberPrice === 0 ? 'included for members' : `members ${money(memberPrice)}` }
 }
 
 // Sum of several price book lines (an estimate option).

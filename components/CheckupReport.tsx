@@ -221,7 +221,7 @@ function ItemCard({
             <div className="text-sm font-semibold text-muted">We&apos;ll quote this after a closer look</div>
           ) : (
             <div className="flex flex-col">
-              <div className="font-display text-2xl leading-none font-bold">{money(item.price)}</div>
+              <div className="font-display text-2xl leading-none font-bold">{item.price === 0 ? 'Included' : money(item.price)}</div>
               <div className="text-xs text-muted">
                 {item.standard !== null && item.standard > item.price && <span className="line-through">{money(item.standard)}</span>}{' '}
                 {item.note}

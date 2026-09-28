@@ -16,13 +16,6 @@ export const replacementCredits: Record<string, number> = {
   Large: 500,
 }
 
-// Price book codes whose member price is $0 because the membership already
-// includes them (the two yearly check-ups include the AC and furnace tune-up).
-// GUESS — confirm with Nadav: PL-150 (water heater flush) also says
-// "Included in membership" in the price book, but the approved check-up mockup
-// charges members $160 for it, so it is left out of this list for now.
-export const includedInMembership = ['HV-110', 'HV-111']
-
 // Diagnostic / service call code per trade (members $19, non-members $119 —
 // the amounts come from the price book).
 export const serviceCallCode: Record<string, string> = {

@@ -20,8 +20,8 @@ EL-200,Electrical,Service,Service upgrade 100A to 200A (incl. meter base),16,493
 EL-201,Electrical,Generator,Whole-home standby generator (22kW) install,16,10600,10100,Install,Large,Gas line by plumbing; permit extra
 EL-202,Electrical,EV,EV charger + new 240V circuit (we supply charger),6,2155,2055,Install,Small,
 HV-100,HVAC,Diagnostic,HVAC diagnostic / service call,—,119,19,Service,,"Members pay $19. Non-members pay $119, never credited toward the repair; joining the club is the only way to the $19 fee."
-HV-110,HVAC,Maintenance,AC tune-up (non-member),1.5,89,80,Service,,Included in membership
-HV-111,HVAC,Maintenance,Furnace tune-up (non-member),1.5,89,80,Service,,Included in membership
+HV-110,HVAC,Maintenance,AC tune-up (non-member),1.5,89,0,Service,,Included in membership
+HV-111,HVAC,Maintenance,Furnace tune-up (non-member),1.5,89,0,Service,,Included in membership
 HV-112,HVAC,Maintenance,Clear condensate drain line,0.75,160,140,Service,,
 HV-120,HVAC,Electrical,Replace run capacitor,0.75,210,180,Service,,Most common summer call
 HV-121,HVAC,Electrical,Replace contactor,0.75,220,190,Service,,
@@ -52,7 +52,7 @@ PL-133,Plumbing,Fixtures,Replace garbage disposal (1/2 HP),1.25,475,405,Service,
 PL-140,Plumbing,Valves,Replace angle stop valve,0.75,180,155,Service,,Each
 PL-141,Plumbing,Valves,Replace pressure-reducing valve,2,610,520,Service,,
 PL-142,Plumbing,Valves,Replace hose bib (frost-free),1.5,370,315,Service,,
-PL-150,Plumbing,Water Heater,Water heater flush / maintenance,1,185,160,Service,,Included in membership
+PL-150,Plumbing,Water Heater,Water heater flush / maintenance,1,185,0,Service,,Included in membership
 PL-151,Plumbing,Water Heater,Replace 40-gal gas water heater,4,1595,1495,Install,Small,Permit extra; haul-away included
 PL-152,Plumbing,Water Heater,Replace 50-gal gas water heater,4.5,1895,1795,Install,Small,Permit extra; haul-away included
 PL-160,Plumbing,Sump,Replace sump pump,1.5,630,540,Service,,
