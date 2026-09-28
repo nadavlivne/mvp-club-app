@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MVP service call estimate</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Graduate&amp;family=Barlow+Condensed:wght@600;700&amp;family=Barlow:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:'Barlow',system-ui,sans-serif;background:#F4F5F7;color:#14223D}
+a{color:#1B5FA8}a:hover{color:#14223D}
+button{font-family:'Barlow',system-ui,sans-serif;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #F4F5F7; position: relative; overflow: hidden;">
+
+<div style="background: #14223D; color: #FFFFFF; padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<div style="display: flex; gap: 3px; transform: skewX(-14deg);"><div style="width: 6px; height: 24px; background: #F2B705;"></div><div style="width: 6px; height: 24px; background: #2F8FE0;"></div><div style="width: 6px; height: 24px; background: #F2672A;"></div></div>
+<div style="font-family: 'Graduate', Georgia, serif; font-size: 24px; line-height: 1;">MVP</div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.2em; color: #C9D2E0;">HOME SERVICES</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05;">{{heading}}</div>
+<div style="font-size: 14px; color: #C9D2E0;">[Address] · [Date] · by [Tech name]</div>
+</div>
+</div>
+
+<sc-if value="{{isEst}}" hint-placeholder-val="{{true}}">
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 14px;">
+
+<div style="background: #FFFFFF; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+<div style="height: 4px; background: #F2672A;"></div>
+<div style="padding: 14px 16px; display: flex; gap: 12px;">
+<div style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 8px; background: #E3E7ED; display: flex; align-items: center; justify-content: center;" aria-label="Photo of the problem"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7688" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></div>
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: #4A5568;">WHAT WE FOUND</div>
+<div style="font-weight: 700; font-size: 16px; line-height: 1.25;">Your AC isn't cooling because the start capacitor failed.</div>
+<div style="font-size: 14px; line-height: 1.4; color: #333D4D;">The outdoor unit can't start without it. The contactor is also worn.</div>
+</div>
+</div>
+</div>
+
+<button onClick="{{toggleJoin}}" style="text-align: left; border-radius: 12px; padding: 14px 16px; background: {{joinBg}}; border: 2px solid {{joinBorder}}; display: flex; align-items: center; gap: 14px; color: #14223D;">
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px;">
+<div style="font-weight: 700; font-size: 16px;">Join MVP Club today — $30/month</div>
+<div style="font-size: 14px; line-height: 1.35; color: #333D4D;">{{joinLine}}</div>
+</div>
+<div style="width: 50px; height: 30px; flex-shrink: 0; border-radius: 999px; background: {{switchBg}}; display: flex; align-items: center; padding: 3px; box-sizing: border-box; justify-content: {{switchJustify}};"><div style="width: 24px; height: 24px; border-radius: 50%; background: #FFFFFF;"></div></div>
+</button>
+
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em; color: #4A5568; margin-top: 4px;">PICK AN OPTION</div>
+<sc-for list="{{options}}" as="o" hint-placeholder-count="3">
+<button onClick="{{o.pick}}" style="text-align: left; background: #FFFFFF; border-radius: 12px; padding: 14px 16px; border: 2px solid {{o.border}}; display: flex; flex-direction: column; gap: 8px; color: #14223D;">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<div style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #14223D; display: flex; align-items: center; justify-content: center; box-sizing: border-box;"><div style="width: 12px; height: 12px; border-radius: 50%; background: {{o.dot}};"></div></div>
+<div style="font-weight: 700; font-size: 17px;">{{o.name}}</div>
+</div>
+<sc-if value="{{o.tag}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #FFF1CC; color: #6B4700;">Most chosen</span></sc-if>
+</div>
+<div style="font-size: 15px; font-weight: 600;">{{o.what}}</div>
+<div style="font-size: 14px; line-height: 1.4; color: #333D4D;">{{o.why}}</div>
+<div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px;">{{o.priceTxt}}</span><span style="font-size: 13px; color: #4A5568; text-decoration: line-through;">{{o.strikeTxt}}</span><span style="font-size: 13px; color: #4A5568;">{{o.note}}</span></div>
+</button>
+</sc-for>
+<div style="font-size: 12px; color: #4A5568; text-align: center;">Sample job · prices from the MVP price book</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-top: 1px solid #D5DBE3; padding: 12px 16px 20px; display: flex; align-items: center; gap: 12px;">
+<div style="flex-grow: 1; display: flex; flex-direction: column;"><div style="font-weight: 700; font-size: 16px;">Today: {{totalTxt}}</div><div style="font-size: 13px; color: #4A5568;">{{feeLine}}</div></div>
+<button onClick="{{goApprove}}" style="height: 48px; padding: 0 18px; border-radius: 10px; border: none; background: #B8410F; color: #FFFFFF; font-size: 16px; font-weight: 700;">Review &amp; approve</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isApprove}}" hint-placeholder-val="{{false}}">
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 14px;">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px;"><span>{{pickName}}</span><span style="font-weight: 700;">{{pickPrice}}</span></div>
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px;"><span>Service call</span><span style="font-weight: 700;">{{feeTxt}}</span></div>
+<div style="border-top: 1px solid #D5DBE3; padding-top: 10px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 700;"><span>Due today</span><span>{{totalTxt}}</span></div>
+<sc-if value="{{join}}" hint-placeholder-val="{{false}}">
+<div style="background: #E3F2E8; border-radius: 8px; padding: 10px 12px; font-size: 14px; line-height: 1.4;"><b>MVP Club membership</b> starts today: $30/month, first term 12 months, then month to month. You saved {{saveTxt}} on this visit.</div>
+</sc-if>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<div style="font-weight: 700; font-size: 16px;">Sign to approve</div>
+<button onClick="{{toggleSign}}" aria-label="Signature box" style="height: 96px; border-radius: 10px; border: 1px dashed #8A96A8; background: #FAFBFC; display: flex; align-items: center; justify-content: center; color: #4A5568; font-size: 14px;">
+<sc-if value="{{signed}}" hint-placeholder-val="{{false}}"><svg width="180" height="56" viewBox="0 0 180 56" fill="none" stroke="#14223D" stroke-width="2.2" stroke-linecap="round"><path d="M8 40c10-22 18-30 22-24s-8 26-2 26 14-30 22-30-6 28 2 28 12-18 18-18 0 16 8 16 16-20 24-20 4 18 12 18 16-10 22-14 10-2 16-4"></path></svg></sc-if>
+<sc-if value="{{notSigned}}" hint-placeholder-val="{{true}}">Tap and sign with your finger</sc-if>
+</button>
+<div style="font-size: 12px; line-height: 1.45; color: #4A5568;">Paid on the tech's device when the work is done. Emergency repair: you may waive the 3-day cancellation period for work done today. [Attorney to confirm wording]</div>
+</div>
+
+<button onClick="{{approve}}" style="height: 52px; border-radius: 12px; border: none; font-size: 17px; font-weight: 700; background: {{approveBg}}; color: {{approveFg}};">{{approveLabel}}</button>
+<button onClick="{{goBack}}" style="height: 44px; border-radius: 10px; border: none; background: transparent; color: #1B5FA8; font-size: 15px; font-weight: 600;">Back to options</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<div style="flex-grow: 1; overflow-y: auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 14px;">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;">
+<div style="width: 56px; height: 56px; border-radius: 50%; background: #E3F2E8; display: flex; align-items: center; justify-content: center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E7B45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px;">Approved</div>
+<div style="font-size: 15px; line-height: 1.45; color: #333D4D;">{{doneLine}}</div>
+</div>
+<button onClick="{{restart}}" style="height: 44px; border-radius: 10px; border: 1px solid #B8C1CF; background: #FFFFFF; color: #14223D; font-size: 15px; font-weight: 600;">Start the demo over</button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { screen: 'est', join: false, pick: 'o1', signed: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const money = n => '$' + Math.round(n).toLocaleString('en-US');
+    const raw = [
+      { id: 'o1', name: 'Repair', what: 'Replace capacitor and contactor', why: 'Gets your AC cooling today. Parts are on the truck.', reg: 430, mem: 370, disc: true },
+      { id: 'o2', name: 'Repair + tune-up', what: 'Capacitor, contactor and a full AC tune-up', why: 'Fixes today\u2019s problem and cleans the system so it runs better all summer. Members get the tune-up included.', reg: 519, mem: 370, disc: true, tag: true },
+      { id: 'o3', name: 'Replace the AC', what: 'New AC condenser and coil [BRAND / MODEL]', why: 'Your unit is 17 years old. Worth considering before the next repair. [WARRANTY TERMS]', reg: 7235, mem: 7235, disc: false }
+    ];
+    const fee = s.join ? 19 : 119;
+    const opts = raw.map(o => {
+      const mem = o.mem;
+      const price = s.join ? mem : o.reg;
+      const on = s.pick === o.id;
+      return Object.assign({}, o, {
+        mem: mem, price: price, priceTxt: money(price),
+        strikeTxt: s.join && o.disc ? money(o.reg) : '',
+        note: o.disc ? (s.join ? 'member price' : 'members ' + money(mem)) : '$250 member credit after 90 days',
+        border: on ? '#14223D' : '#D5DBE3', dot: on ? '#14223D' : 'transparent',
+        tag: !!o.tag,
+        pick: () => this.setState({ pick: o.id })
+      });
+    });
+    const p = opts.find(o => o.id === s.pick);
+    const save = (p.reg - p.mem) + 100;
+    const total = p.price + fee;
+    return {
+      isEst: s.screen === 'est', isApprove: s.screen === 'approve', isDone: s.screen === 'done',
+      heading: s.screen === 'done' ? 'You’re all set' : (s.screen === 'approve' ? 'Review and approve' : 'Your estimate'),
+      options: opts, join: s.join,
+      joinLine: s.join ? 'Member prices applied. You save ' + money(save) + ' on this visit.' : 'Members pay $19 for the service call and less on repairs: save ' + money(save) + ' today.',
+      joinBg: s.join ? '#E3F2E8' : '#FFFFFF', joinBorder: s.join ? '#1E7B45' : '#B8C1CF',
+      switchBg: s.join ? '#1E7B45' : '#B8C1CF', switchJustify: s.join ? 'flex-end' : 'flex-start',
+      toggleJoin: () => this.setState({ join: !s.join }),
+      totalTxt: money(total), feeTxt: money(fee), saveTxt: money(save),
+      feeLine: p.name + ' + ' + money(fee) + ' service call',
+      pickName: p.name + ' — ' + p.what, pickPrice: p.priceTxt,
+      signed: s.signed, notSigned: !s.signed,
+      toggleSign: () => this.setState({ signed: !s.signed }),
+      approveLabel: s.signed ? 'Approve ' + money(total) : 'Sign to continue',
+      approveBg: s.signed ? '#B8410F' : '#D5DBE3', approveFg: s.signed ? '#FFFFFF' : '#4A5568',
+      approve: () => { if (s.signed) this.setState({ screen: 'done' }); },
+      goApprove: () => this.setState({ screen: 'approve' }),
+      goBack: () => this.setState({ screen: 'est' }),
+      doneLine: (s.join ? 'Welcome to MVP Club. ' : '') + 'Your tech is starting the work now. You’ll get the invoice and a copy of this approval by text and email.',
+      restart: () => this.setState({ screen: 'est', join: false, pick: 'o1', signed: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

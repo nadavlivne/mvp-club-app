@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MVP check-up report and approval</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Graduate&amp;family=Barlow+Condensed:wght@600;700&amp;family=Barlow:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;font-family:'Barlow',system-ui,sans-serif;background:#F4F5F7;color:#14223D}
+a{color:#1B5FA8}a:hover{color:#14223D}
+button{font-family:'Barlow',system-ui,sans-serif;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #F4F5F7; position: relative; overflow: hidden;">
+
+<div style="background: #14223D; color: #FFFFFF; padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 12px;">
+<div style="display: flex; align-items: center; gap: 10px;">
+<div style="display: flex; gap: 3px; transform: skewX(-14deg);"><div style="width: 6px; height: 24px; background: #F2B705;"></div><div style="width: 6px; height: 24px; background: #2F8FE0;"></div><div style="width: 6px; height: 24px; background: #F2672A;"></div></div>
+<div style="font-family: 'Graduate', Georgia, serif; font-size: 24px; line-height: 1;">MVP</div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.2em; color: #C9D2E0;">CLUB</div>
+</div>
+<sc-if value="{{isReport}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05;">Your home check-up</div>
+<div style="font-size: 14px; color: #C9D2E0;">[Address] · [Date] · by [Tech name]</div>
+</div>
+</sc-if>
+<sc-if value="{{isApprove}}" hint-placeholder-val="{{false}}">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05;">Review and approve</div>
+</sc-if>
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05;">You're all set</div>
+</sc-if>
+</div>
+
+<sc-if value="{{isReport}}" hint-placeholder-val="{{true}}">
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 14px;">
+
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center;">
+<div style="display: flex; flex-direction: column; gap: 2px;"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #1E7B45;">14</div><div style="font-size: 12px; color: #4A5568;">checked OK</div></div>
+<div style="display: flex; flex-direction: column; gap: 2px;"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #A3261B;">2</div><div style="font-size: 12px; color: #4A5568;">need attention now</div></div>
+<div style="display: flex; flex-direction: column; gap: 2px;"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; color: #1B5FA8;">2</div><div style="font-size: 12px; color: #4A5568;">to plan for</div></div>
+</div>
+
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em; color: #4A5568; margin-top: 4px;">NEEDS ATTENTION NOW</div>
+<sc-for list="{{nowList}}" as="item" hint-placeholder-count="2">
+<div style="background: #FFFFFF; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+<div style="height: 4px; background: {{item.tcolor}};"></div>
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; gap: 12px;">
+<div style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 8px; background: #E3E7ED; display: flex; align-items: center; justify-content: center;" aria-label="Photo from the check-up"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7688" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></div>
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+<div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;"><span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: {{item.badgeBg}}; color: {{item.badgeFg}};">{{item.badge}}</span><span style="font-size: 12px; color: #4A5568;">{{item.trade}}</span></div>
+<div style="font-weight: 700; font-size: 16px; line-height: 1.25;">{{item.title}}</div>
+</div>
+</div>
+<div style="font-size: 14px; line-height: 1.4; color: #333D4D;">{{item.reason}}</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+<div style="display: flex; flex-direction: column;"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1;">{{item.memTxt}}</div><div style="font-size: 12px; color: #4A5568;"><span style="text-decoration: line-through;">{{item.regTxt}}</span> {{item.noteTxt}}</div></div>
+<button onClick="{{item.onAdd}}" style="min-width: 116px; height: 44px; border-radius: 10px; font-size: 16px; font-weight: 700; background: {{item.btnBg}}; color: {{item.btnFg}}; border: 2px solid {{item.btnBorder}};">{{item.btnLabel}}</button>
+</div>
+</div>
+</div>
+</sc-for>
+
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.06em; color: #4A5568; margin-top: 8px;">PLAN FOR THESE</div>
+<sc-for list="{{laterList}}" as="item" hint-placeholder-count="2">
+<div style="background: #FFFFFF; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+<div style="height: 4px; background: {{item.tcolor}};"></div>
+<div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; gap: 12px;">
+<div style="width: 72px; height: 72px; flex-shrink: 0; border-radius: 8px; background: #E3E7ED; display: flex; align-items: center; justify-content: center;" aria-label="Photo from the check-up"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7688" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></div>
+<div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+<div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;"><span style="font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: {{item.badgeBg}}; color: {{item.badgeFg}};">{{item.badge}}</span><span style="font-size: 12px; color: #4A5568;">{{item.trade}}</span></div>
+<div style="font-weight: 700; font-size: 16px; line-height: 1.25;">{{item.title}}</div>
+</div>
+</div>
+<div style="font-size: 14px; line-height: 1.4; color: #333D4D;">{{item.reason}}</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+<div style="display: flex; flex-direction: column;"><div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 24px; line-height: 1;">{{item.memTxt}}</div><div style="font-size: 12px; color: #4A5568;"><span style="text-decoration: line-through;">{{item.regTxt}}</span> {{item.noteTxt}}</div></div>
+<div style="display: flex; gap: 8px;">
+<button onClick="{{item.onRemind}}" style="height: 44px; padding: 0 12px; border-radius: 10px; font-size: 14px; font-weight: 600; background: {{item.remBg}}; color: #14223D; border: 1px solid #B8C1CF;">{{item.remLabel}}</button>
+<button onClick="{{item.onAdd}}" style="min-width: 88px; height: 44px; border-radius: 10px; font-size: 16px; font-weight: 700; background: {{item.btnBg}}; color: {{item.btnFg}}; border: 2px solid {{item.btnBorder}};">{{item.btnLabel}}</button>
+</div>
+</div>
+</div>
+</div>
+</sc-for>
+
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;">
+<div style="font-weight: 700; font-size: 16px;">Checked and OK (14)</div>
+<div style="font-size: 14px; line-height: 1.5; color: #333D4D;">Furnace flame and flue · Carbon monoxide · AC temperature drop · Thermostat · Water pressure · Main shut-off · All faucets and drains · Toilets · Sump pump · Panel (cover off) · Meter base and service cable · Kitchen GFCIs · Smoke and CO alarms · Filter replaced today</div>
+</div>
+<div style="font-size: 12px; color: #4A5568; text-align: center;">Sample home · items and prices from the MVP Inspection Guide and price book</div>
+</div>
+
+<sc-if value="{{hasCart}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-top: 1px solid #D5DBE3; padding: 12px 16px 20px; display: flex; align-items: center; gap: 12px;">
+<div style="flex-grow: 1; display: flex; flex-direction: column;"><div style="font-weight: 700; font-size: 16px;">{{cartLine}}</div><div style="font-size: 13px; color: #1E7B45; font-weight: 600;">{{saveLine}}</div></div>
+<button onClick="{{goApprove}}" style="height: 48px; padding: 0 18px; border-radius: 10px; border: none; background: #B8410F; color: #FFFFFF; font-size: 16px; font-weight: 700;">Review &amp; approve</button>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{isApprove}}" hint-placeholder-val="{{false}}">
+<div style="flex-grow: 1; overflow-y: auto; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 14px;">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<sc-for list="{{cartItems}}" as="c" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px;"><span>{{c.title}}</span><span style="font-weight: 700;">{{c.memTxt}}</span></div>
+</sc-for>
+<div style="border-top: 1px solid #D5DBE3; padding-top: 10px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 700;"><span>Total</span><span>{{totalTxt}}</span></div>
+<div style="font-size: 13px; color: #1E7B45; font-weight: 600;">{{saveLine}}</div>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<div style="font-weight: 700; font-size: 16px;">When should we come?</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="4">
+<button onClick="{{d.pick}}" style="height: 44px; border-radius: 10px; font-size: 14px; font-weight: 600; background: {{d.bg}}; color: {{d.fg}}; border: 1px solid #B8C1CF;">{{d.label}}</button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+<sc-for list="{{slots}}" as="s" hint-placeholder-count="2">
+<button onClick="{{s.pick}}" style="height: 44px; border-radius: 10px; font-size: 14px; font-weight: 600; background: {{s.bg}}; color: {{s.fg}}; border: 1px solid #B8C1CF;">{{s.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+<div style="font-weight: 700; font-size: 16px;">Sign to approve</div>
+<button onClick="{{toggleSign}}" aria-label="Signature box" style="height: 96px; border-radius: 10px; border: 1px dashed #8A96A8; background: #FAFBFC; display: flex; align-items: center; justify-content: center; color: #4A5568; font-size: 14px;">
+<sc-if value="{{signed}}" hint-placeholder-val="{{false}}"><svg width="180" height="56" viewBox="0 0 180 56" fill="none" stroke="#14223D" stroke-width="2.2" stroke-linecap="round"><path d="M8 40c10-22 18-30 22-24s-8 26-2 26 14-30 22-30-6 28 2 28 12-18 18-18 0 16 8 16 16-20 24-20 4 18 12 18 16-10 22-14 10-2 16-4"></path></svg></sc-if>
+<sc-if value="{{notSigned}}" hint-placeholder-val="{{true}}">Tap and sign with your finger</sc-if>
+</button>
+<div style="font-size: 12px; line-height: 1.45; color: #4A5568;">Pay after the work is done with the card on file. You may cancel within 3 business days; the cancellation notice is emailed to you with a copy of this approval. [Attorney to confirm wording]</div>
+</div>
+
+<button onClick="{{approve}}" style="height: 52px; border-radius: 12px; border: none; font-size: 17px; font-weight: 700; background: {{approveBg}}; color: {{approveFg}};">{{approveLabel}}</button>
+<button onClick="{{goBack}}" style="height: 44px; border-radius: 10px; border: none; background: transparent; color: #1B5FA8; font-size: 15px; font-weight: 600;">Back to report</button>
+</div>
+</sc-if>
+
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<div style="flex-grow: 1; overflow-y: auto; padding: 24px 16px; display: flex; flex-direction: column; gap: 14px;">
+<div style="background: #FFFFFF; border-radius: 12px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;">
+<div style="width: 56px; height: 56px; border-radius: 50%; background: #E3F2E8; display: flex; align-items: center; justify-content: center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E7B45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
+<div style="font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px;">Approved</div>
+<div style="font-size: 15px; line-height: 1.45; color: #333D4D;">{{doneLine}}</div>
+</div>
+<div style="background: #FFFFFF; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+<sc-for list="{{cartItems}}" as="c" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 15px;"><span>{{c.title}}</span><span style="font-weight: 700;">{{c.memTxt}}</span></div>
+</sc-for>
+</div>
+<div style="font-size: 14px; line-height: 1.45; color: #4A5568; text-align: center;">We'll remind you about the items you saved for later. Questions? Call [MVP PHONE].</div>
+<button onClick="{{restart}}" style="height: 44px; border-radius: 10px; border: 1px solid #B8C1CF; background: #FFFFFF; color: #14223D; font-size: 15px; font-weight: 600;">Start the demo over</button>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { screen: 'report', added: { v1: true, b1: true }, remind: {}, day: null, slot: 'am', signed: false };
+  }
+  renderVals() {
+    const s = this.state;
+    const money = n => '$' + Math.round(n).toLocaleString('en-US');
+    const badges = {
+      now: { t: 'Red · fix now', bg: '#FDE7E4', fg: '#8A1C12' },
+      m3: { t: 'Orange · within 6 months', bg: '#FFF1CC', fg: '#6B4700' },
+      plan: { t: 'Yellow · within 12 months', bg: '#E3EEFB', fg: '#174F8C' }
+    };
+    const raw = [
+      { id: 'v1', urg: 'now', trade: 'Plumbing', tcolor: '#2F8FE0', title: 'Leak under the kitchen sink', reason: 'The supply line is dripping and the cabinet floor is wet. Leaks like this damage cabinets and floors quickly.', reg: 180, mem: 155 },
+      { id: 'b1', urg: 'now', trade: 'Electrical', tcolor: '#F2B705', title: 'Bathroom GFCI outlet does not trip', reason: 'This outlet protects against shock near water, and it is not working.', reg: 145, mem: 125 },
+      { id: 'c1', urg: 'm3', trade: 'Heating & Cooling', tcolor: '#F2672A', title: 'AC contactor is worn', reason: 'The contacts are pitted. Worn contacts can damage the compressor, the most expensive part of the AC.', reg: 220, mem: 190 },
+      { id: 'w1', urg: 'plan', trade: 'Plumbing', tcolor: '#2F8FE0', title: 'Water heater is 11 years old', reason: 'Getting near end of life. A flush now can extend it; plan for a replacement.', reg: 185, mem: 160 }
+    ];
+    const items = raw.map(r => {
+      const mem = r.mem;
+      const on = !!s.added[r.id];
+      const rem = !!s.remind[r.id];
+      const b = badges[r.urg];
+      return Object.assign({}, r, {
+        mem: mem, memTxt: money(mem), regTxt: money(r.reg),
+        noteTxt: 'member price',
+        badge: b.t, badgeBg: b.bg, badgeFg: b.fg,
+        btnLabel: on ? 'Added' : 'Add', btnBg: on ? '#14223D' : '#FFFFFF', btnFg: on ? '#FFFFFF' : '#14223D', btnBorder: '#14223D',
+        remLabel: rem ? 'Reminder set' : 'Remind me', remBg: rem ? '#E3EEFB' : '#FFFFFF',
+        onAdd: () => this.setState({ added: Object.assign({}, s.added, { [r.id]: !on }) }),
+        onRemind: () => this.setState({ remind: Object.assign({}, s.remind, { [r.id]: !rem }) })
+      });
+    });
+    const cart = items.filter(i => s.added[i.id]);
+    const total = cart.reduce((a, i) => a + i.mem, 0);
+    const save = cart.reduce((a, i) => a + (i.reg - i.mem), 0);
+    const dayNames = ['Tomorrow', 'Wed', 'Thu', 'Fri'];
+    const days = dayNames.map((d, i) => ({ label: d, bg: s.day === i ? '#14223D' : '#FFFFFF', fg: s.day === i ? '#FFFFFF' : '#14223D', pick: () => this.setState({ day: i }) }));
+    const slots = [['am', 'Morning 8–12'], ['pm', 'Afternoon 12–5']].map(p => ({ label: p[1], bg: s.slot === p[0] ? '#14223D' : '#FFFFFF', fg: s.slot === p[0] ? '#FFFFFF' : '#14223D', pick: () => this.setState({ slot: p[0] }) }));
+    const ready = s.signed && s.day !== null;
+    return {
+      isReport: s.screen === 'report', isApprove: s.screen === 'approve', isDone: s.screen === 'done',
+      nowList: items.filter(i => i.urg === 'now'), laterList: items.filter(i => i.urg !== 'now'),
+      cartItems: cart, hasCart: cart.length > 0,
+      cartLine: cart.length + (cart.length === 1 ? ' item · ' : ' items · ') + money(total),
+      saveLine: 'You save ' + money(save) + ' as a member',
+      totalTxt: money(total),
+      days: days, slots: slots,
+      signed: s.signed, notSigned: !s.signed,
+      toggleSign: () => this.setState({ signed: !s.signed }),
+      approveLabel: ready ? 'Approve ' + money(total) : (s.day === null ? 'Pick a day to continue' : 'Sign to continue'),
+      approveBg: ready ? '#B8410F' : '#D5DBE3', approveFg: ready ? '#FFFFFF' : '#4A5568',
+      approve: () => { if (ready) this.setState({ screen: 'done' }); },
+      goApprove: () => this.setState({ screen: 'approve' }),
+      goBack: () => this.setState({ screen: 'report' }),
+      doneLine: 'We will text you to confirm ' + (s.day === null ? '' : dayNames[s.day] + ' ' + (s.slot === 'am' ? 'morning' : 'afternoon')) + '. A copy of your approval is on its way by email.',
+      restart: () => this.setState({ screen: 'report', added: { v1: true, b1: true }, remind: {}, day: null, slot: 'am', signed: false })
+    };
+  }
+}
+</script>
+</body>
+</html>

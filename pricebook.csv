@@ -1,0 +1,63 @@
+code,trade,category,task,est_hours,standard_price,member_price,rate_type,credit_tier,notes
+EL-100,Electrical,Diagnostic,Electrical diagnostic / service call,—,119,19,Service,,"Members pay $19. Non-members pay $119, never credited toward the repair; joining the club is the only way to the $19 fee."
+EL-110,Electrical,Devices,Replace standard outlet,0.5,105,90,Service,,
+EL-111,Electrical,Devices,Replace GFCI outlet,0.5,145,125,Service,,
+EL-112,Electrical,Devices,Outdoor GFCI with in-use cover,1.5,370,315,Service,,Existing circuit
+EL-120,Electrical,Devices,Replace single-pole switch,0.5,105,90,Service,,
+EL-121,Electrical,Devices,Install dimmer switch,0.5,155,135,Service,,
+EL-130,Electrical,Lighting,Replace light fixture (customer-supplied),1,195,170,Service,,Labor + connectors only
+EL-131,Electrical,Lighting,Install ceiling fan on existing fan-rated box,1.5,310,265,Service,,Customer-supplied fan
+EL-132,Electrical,Lighting,Install fan-rated box + ceiling fan,2.5,545,465,Service,,Customer-supplied fan; attic/access dependent
+EL-140,Electrical,Panel,Replace single-pole breaker,0.75,180,155,Service,,
+EL-141,Electrical,Panel,Replace AFCI/GFCI breaker,0.75,245,210,Service,,
+EL-142,Electrical,Panel,Whole-house surge protector,1.5,520,445,Service,,Strong membership upsell
+EL-143,Electrical,Panel,Panel replacement — 200A,12,3765,3265,Install,Large,Permit & utility fees extra
+EL-150,Electrical,Circuits,"Add 120V circuit (up to 25 ft, open access)",4,820,700,Install,,
+EL-151,Electrical,Circuits,Add 240V circuit (dryer / EV),5,1185,1010,Install,,Up to 40 ft; permit extra
+EL-152,Electrical,EV,Install Level 2 EV charger (circuit exists),2,410,350,Service,,Customer-supplied charger
+EL-160,Electrical,Safety,Replace hardwired smoke/CO detector,0.5,185,160,Service,,Each
+EL-200,Electrical,Service,Service upgrade 100A to 200A (incl. meter base),16,4930,4430,Install,Large,Permit & utility fees extra
+EL-201,Electrical,Generator,Whole-home standby generator (22kW) install,16,10600,10100,Install,Large,Gas line by plumbing; permit extra
+EL-202,Electrical,EV,EV charger + new 240V circuit (we supply charger),6,2155,2055,Install,Small,
+HV-100,HVAC,Diagnostic,HVAC diagnostic / service call,—,119,19,Service,,"Members pay $19. Non-members pay $119, never credited toward the repair; joining the club is the only way to the $19 fee."
+HV-110,HVAC,Maintenance,AC tune-up (non-member),1.5,89,80,Service,,Included in membership
+HV-111,HVAC,Maintenance,Furnace tune-up (non-member),1.5,89,80,Service,,Included in membership
+HV-112,HVAC,Maintenance,Clear condensate drain line,0.75,160,140,Service,,
+HV-120,HVAC,Electrical,Replace run capacitor,0.75,210,180,Service,,Most common summer call
+HV-121,HVAC,Electrical,Replace contactor,0.75,220,190,Service,,
+HV-130,HVAC,Heating,Replace hot-surface igniter,0.75,230,200,Service,,
+HV-131,HVAC,Heating,Replace/clean flame sensor,0.5,135,115,Service,,
+HV-132,HVAC,Heating,Replace draft pressure switch,1,285,245,Service,,
+HV-133,HVAC,Heating,Replace inducer motor,2.5,935,795,Service,,
+HV-140,HVAC,Motors,Replace blower motor (PSC),2.5,865,740,Service,,ECM motors priced separately
+HV-141,HVAC,Motors,Replace condenser fan motor,2,660,565,Service,,
+HV-150,HVAC,Refrigerant,R-410A refrigerant — per lb,0.25,130,115,Service,,Leak search not included
+HV-160,HVAC,Controls,Replace thermostat (standard programmable),1,285,245,Service,,
+HV-161,HVAC,Controls,Install smart thermostat (customer-supplied),1,185,160,Service,,Add C-wire kit if needed
+HV-200,HVAC,Replacement,"Replace AC condenser + coil (3-ton, 14.3 SEER2)",10,7235,6985,Install,Medium,Crew hours; permit extra
+HV-201,HVAC,Replacement,"Replace gas furnace (80%, 80k BTU)",8,3815,3565,Install,Medium,Crew hours; permit extra
+HV-202,HVAC,Replacement,Full system: furnace + AC + coil (3-ton),16,10600,10100,Install,Large,Crew hours; permit extra
+HV-203,HVAC,Replacement,Heat pump system (3-ton),16,10995,10495,Install,Large,Crew hours; check rebates
+PL-100,Plumbing,Diagnostic,Plumbing diagnostic / service call,—,119,19,Service,,"Members pay $19. Non-members pay $119, never credited toward the repair; joining the club is the only way to the $19 fee."
+PL-110,Plumbing,Drains,Clear sink / tub drain (cable),1,195,170,Service,,
+PL-111,Plumbing,Drains,Clear main line from accessible cleanout,2,400,340,Service,,Camera inspection extra
+PL-120,Plumbing,Toilets,Replace flapper or fill valve,0.75,200,170,Service,,
+PL-121,Plumbing,Toilets,"Toilet rebuild (flush, fill, supply line)",1.25,325,280,Service,,
+PL-122,Plumbing,Toilets,Replace toilet (customer-supplied),1.5,330,285,Service,,"Wax ring, bolts, supply"
+PL-123,Plumbing,Toilets,"Replace toilet (standard, we supply)",1.5,680,580,Service,,
+PL-130,Plumbing,Fixtures,Replace kitchen faucet (customer-supplied),1.5,310,265,Service,,
+PL-131,Plumbing,Fixtures,Replace bathroom faucet (customer-supplied),1.25,265,230,Service,,
+PL-132,Plumbing,Fixtures,Replace shower valve cartridge,1,275,235,Service,,
+PL-133,Plumbing,Fixtures,Replace garbage disposal (1/2 HP),1.25,475,405,Service,,
+PL-140,Plumbing,Valves,Replace angle stop valve,0.75,180,155,Service,,Each
+PL-141,Plumbing,Valves,Replace pressure-reducing valve,2,610,520,Service,,
+PL-142,Plumbing,Valves,Replace hose bib (frost-free),1.5,370,315,Service,,
+PL-150,Plumbing,Water Heater,Water heater flush / maintenance,1,185,160,Service,,Included in membership
+PL-151,Plumbing,Water Heater,Replace 40-gal gas water heater,4,1595,1495,Install,Small,Permit extra; haul-away included
+PL-152,Plumbing,Water Heater,Replace 50-gal gas water heater,4.5,1895,1795,Install,Small,Permit extra; haul-away included
+PL-160,Plumbing,Sump,Replace sump pump,1.5,630,540,Service,,
+PL-200,Plumbing,Water Heater,Install tankless water heater (gas),8,4220,4120,Install,Small,Venting/gas upsizing extra if needed
+PL-201,Plumbing,Sewer,Sewer line spot repair (excavation up to 10 ft),12,2955,2705,Install,Medium,Permit extra
+PL-202,Plumbing,Water Line,Replace main water line (up to 50 ft),14,3810,3560,Install,Medium,Permit extra
+PL-203,Plumbing,Repipe,"Whole-house repipe, PEX (2-bath home)",40,9625,9125,Install,Large,Drywall patch not included
+PL-204,Plumbing,Sewer,Sewer camera inspection,1,185,160,Service,,Lead source for sewer jobs
