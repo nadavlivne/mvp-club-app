@@ -71,15 +71,29 @@ export const selectedFindings = (w: VisitWork) => Object.values(w.areas).flatMap
 export const defaultTitle = (g: GuideRow) => `${g.area}: ${g.recommend}`
 
 // Why the check-up can't be sent yet (empty = ready). Rules from CLAUDE.md.
-export function sendBlockers(w: VisitWork, areas: Area[], guide: Map<string, GuideRow>, tradeLabel: (t: string) => string) {
-  const out: string[] = []
+// Each blocker says where to fix it: the trade section and the element to scroll to.
+export type Blocker = { text: string; trade: string; target: string }
+
+export const areaTarget = (key: string) => `area-${key}`
+export const findingTarget = (id: string) => `finding-${id}`
+
+export function sendBlockers(w: VisitWork, areas: Area[], guide: Map<string, GuideRow>, tradeLabel: (t: string) => string): Blocker[] {
+  const out: Blocker[] = []
   for (const t of tradeOrder) {
-    const p = tradeProgress(w, areas, t)
-    if (!p.complete) out.push(`${tradeLabel(t)}: ${p.total - p.done} of ${p.total} areas not checked yet`)
+    const open = areas.filter((a) => a.trade === t && !areaDone(w, a.key))
+    if (open.length) {
+      out.push({
+        text: `${tradeLabel(t)}: ${open.length} ${open.length === 1 ? 'area' : 'areas'} not checked yet (${open.map((a) => a.area).join(', ')})`,
+        trade: t,
+        target: areaTarget(open[0].key),
+      })
+    }
   }
   for (const id of selectedFindings(w)) {
     const g = guide.get(id)
-    if (g?.rating === 'RED' && !w.notes[id]?.photo) out.push(`Red item needs a photo: ${w.notes[id]?.title || defaultTitle(g)}`)
+    if (g?.rating === 'RED' && !w.notes[id]?.photo) {
+      out.push({ text: `Red item needs a photo: ${w.notes[id]?.title || defaultTitle(g)}`, trade: g.trade, target: findingTarget(id) })
+    }
   }
   return out
 }

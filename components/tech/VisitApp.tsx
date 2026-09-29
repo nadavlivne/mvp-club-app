@@ -1,12 +1,15 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ratings, tradeInfo } from '@/config/business'
 import { money, priceLine } from '@/lib/pricing'
 import {
+  areaDone,
+  areaTarget,
   checklistAreas,
   defaultTitle,
+  findingTarget,
   selectedFindings,
   sendBlockers,
   toCheckupInput,
@@ -48,10 +51,26 @@ export default function VisitApp({
   const [preview, setPreview] = useState(false)
   const checkup = visit.kind === 'checkup'
 
-  const go = (s: Section) => {
+  // Where to scroll after switching section (a "Take me there" from Review & send).
+  const [target, setTarget] = useState<string | null>(null)
+  const [highlight, setHighlight] = useState<string | null>(null)
+
+  const go = (s: Section, to?: string) => {
     setSection(s)
-    window.scrollTo(0, 0)
+    setTarget(to ?? null)
+    if (!to) window.scrollTo(0, 0)
   }
+
+  useEffect(() => {
+    if (!target) return
+    const el = document.getElementById(target)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setHighlight(target)
+    setTarget(null)
+    const t = setTimeout(() => setHighlight(null), 2500)
+    return () => clearTimeout(t)
+  }, [target, section])
 
   if (preview) {
     const today = new Date().toISOString().slice(0, 10)
@@ -143,6 +162,7 @@ export default function VisitApp({
               update={update}
               visit={visit}
               book={catalog.book}
+              highlight={highlight}
             />
           )}
           {section === 'send' &&
@@ -303,6 +323,7 @@ function TradeChecklist({
   update,
   visit,
   book,
+  highlight,
 }: {
   trade: string
   areas: Area[]
@@ -310,6 +331,7 @@ function TradeChecklist({
   update: Update
   visit: Visit
   book: Map<string, PriceBookRow>
+  highlight: string | null
 }) {
   const p = tradeProgress(work, areas, trade)
   const setArea = (key: string, next: { ok: boolean; findings: string[] }) =>
@@ -329,9 +351,14 @@ function TradeChecklist({
 
       {areas.map((a) => {
         const state = work.areas[a.key] ?? { ok: false, findings: [] }
-        const done = state.ok || state.findings.length > 0
+        const done = areaDone(work, a.key)
+        const lit = highlight === areaTarget(a.key)
         return (
-          <div key={a.key} className="flex flex-col overflow-hidden rounded-xl bg-white">
+          <div
+            key={a.key}
+            id={areaTarget(a.key)}
+            className={`flex scroll-mt-4 flex-col overflow-hidden rounded-xl bg-white transition-shadow ${lit ? 'ring-4 ring-approve' : ''}`}
+          >
             <div className="h-1" style={{ background: tradeInfo[trade].color }} />
             <div className="flex flex-col gap-2.5 px-4 py-3.5">
               <div className="flex items-start justify-between gap-3">
@@ -339,6 +366,7 @@ function TradeChecklist({
                   <div className="flex items-center gap-2 text-base font-bold">
                     {done && <span className="text-success">✓</span>}
                     {a.area}
+                    {!done && <span className="rounded-full bg-[#FFF1CC] px-2 py-0.5 text-xs font-bold text-[#6B4700]">Not checked</span>}
                     {a.rows.some((r) => r.whoCanCheck === 'Trade tech') && (
                       <span className="rounded-full bg-page px-2 py-0.5 text-xs font-bold text-muted">Trade tech</span>
                     )}
@@ -361,8 +389,13 @@ function TradeChecklist({
                 {a.rows.map((g) => {
                   const on = state.findings.includes(g.id)
                   const r = ratings[g.rating]
+                  const litF = highlight === findingTarget(g.id)
                   return (
-                    <div key={g.id} className={`flex flex-col rounded-[10px] border ${on ? 'border-navy' : 'border-line'}`}>
+                    <div
+                      key={g.id}
+                      id={findingTarget(g.id)}
+                      className={`flex flex-col rounded-[10px] border ${on ? 'border-navy' : 'border-line'} ${litF ? 'ring-4 ring-approve' : ''}`}
+                    >
                       <button
                         type="button"
                         aria-pressed={on}
@@ -404,7 +437,8 @@ function priceHint(g: GuideRow, book: Map<string, PriceBookRow>, visit: Visit) {
   const row = book.get(g.pricebookCode)
   if (!row) return ''
   const p = priceLine(row, visit.customer)
-  return p.price === 0 ? 'Included' : money(p.price)
+  const price = p.price === 0 ? 'Included' : money(p.price)
+  return row.category === 'Diagnostic' ? `${price} diagnostic` : price
 }
 
 function FindingEditor({
@@ -540,7 +574,7 @@ function SendPanel({
   guide: Map<string, GuideRow>
   book: Map<string, PriceBookRow>
   onPreview: () => void
-  onGoTo: (s: Section) => void
+  onGoTo: (s: Section, target?: string) => void
 }) {
   const blockers = sendBlockers(work, areas, guide, tradeLabel)
   const ids = selectedFindings(work)
@@ -574,19 +608,17 @@ function SendPanel({
         <Card className="flex flex-col gap-2 border-2 border-alert">
           <div className="text-base font-bold text-alert">Can&apos;t send yet</div>
           {blockers.map((b) => (
-            <div key={b} className="text-sm text-body">
-              • {b}
+            <div key={b.text} className="flex items-center justify-between gap-3 border-t border-line pt-2 first-of-type:border-0">
+              <span className="text-sm text-body">{b.text}</span>
+              <button
+                type="button"
+                onClick={() => onGoTo(b.trade, b.target)}
+                className="h-11 shrink-0 rounded-[10px] bg-navy px-3 text-sm font-bold text-white"
+              >
+                Take me there
+              </button>
             </div>
           ))}
-          <div className="flex flex-wrap gap-2 pt-1">
-            {tradeOrder
-              .filter((t) => !tradeProgress(work, areas, t).complete)
-              .map((t) => (
-                <button key={t} type="button" onClick={() => onGoTo(t)} className="h-11 rounded-[10px] border border-edge bg-white px-3 text-sm font-semibold">
-                  Go to {tradeLabel(t)}
-                </button>
-              ))}
-          </div>
         </Card>
       ) : (
         <Card className="border-2 border-success text-base font-bold text-success">
