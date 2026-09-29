@@ -68,7 +68,16 @@ export default function TechToday({ day, guide, dateText }: { day: TechDay; guid
             const w = works[v.id]
             const checkup = v.kind === 'checkup'
             const done = w ? tradeOrder.filter((t) => tradeProgress(w, areas, t).complete).length : 0
-            const status = w?.sentAt ? 'Report sent' : checkup ? `${done} of 3 trades done` : 'Estimate builder coming next'
+            const options = w?.estimate?.options.length ?? 0
+            const status = w?.sentAt
+              ? checkup
+                ? 'Report sent'
+                : 'Estimate sent'
+              : checkup
+                ? `${done} of 3 trades done`
+                : options
+                  ? `Estimate: ${options} ${options === 1 ? 'option' : 'options'}`
+                  : 'Estimate not started'
             return (
               <Link key={v.id} href={`/tech/visit/${v.id}`} className="block">
                 <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white">

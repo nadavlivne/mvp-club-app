@@ -29,8 +29,12 @@ export function Header({ tagline, title, sub }: { tagline: string; title: string
   )
 }
 
-export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-xl bg-white px-4 py-3.5 ${className}`}>{children}</div>
+export function Card({ children, className = '', id }: { children: React.ReactNode; className?: string; id?: string }) {
+  return (
+    <div id={id} className={`rounded-xl bg-white px-4 py-3.5 ${className}`}>
+      {children}
+    </div>
+  )
 }
 
 export function SectionTitle({ children }: { children: React.ReactNode }) {

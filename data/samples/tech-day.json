@@ -68,6 +68,20 @@
       ]
     },
     {
+      "id": "v202",
+      "vanId": "van-2",
+      "window": "11:00–1:00",
+      "kind": "service",
+      "trade": "Plumbing",
+      "complaint": "No hot water",
+      "customer": { "name": "Sample customer F", "isMember": true, "memberSince": "2025-06-01" },
+      "address": "31 Sample Rd, Cincinnati",
+      "homeYear": 1999,
+      "equipment": [
+        { "id": "e1", "type": "Water heater", "brand": "A.O. Smith", "model": "GCR-40", "year": 2012 }
+      ]
+    },
+    {
       "id": "v301",
       "vanId": "van-3",
       "window": "9:00–11:00",

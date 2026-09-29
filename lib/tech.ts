@@ -2,7 +2,7 @@
 // that decide when a check-up can be sent. Pure functions (no browser, no server).
 import type { Rating } from '@/config/business'
 import type { Customer, GuideRow } from './types'
-import type { CheckupInput } from './views'
+import type { CheckupInput, EstimateInput } from './views'
 
 export type Van = { id: string; name: string; tech: string }
 
@@ -33,8 +33,26 @@ export type VisitWork = {
   notes: Record<string, { title: string; note: string; photo?: string }>
   // Problems the guide doesn't cover: sent to the office for a quote, not to the customer.
   quoteRequests: { id: string; trade: string; description: string; photo?: string }[]
+  // Service calls: the estimate the tech builds from the price book.
+  estimate?: EstimateWork
   sentAt?: string
 }
+
+export type EstimateOptionWork = {
+  key: string
+  name: string
+  what: string // short line; empty = built from the price book tasks
+  why: string
+  mostChosen: boolean
+  codes: string[] // price book codes; a code listed twice means quantity 2
+}
+
+export type EstimateWork = {
+  found: { title: string; detail: string; photo?: string }
+  options: EstimateOptionWork[]
+}
+
+export const newEstimate = (): EstimateWork => ({ found: { title: '', detail: '' }, options: [] })
 
 export const newWork = (v: Visit): VisitWork => ({ equipment: v.equipment, areas: {}, notes: {}, quoteRequests: [] })
 
@@ -114,5 +132,54 @@ export function toCheckupInput(v: Visit, w: VisitWork, areas: Area[], guide: Map
       photo: w.notes[id]?.photo,
     })),
     checkedOk: areas.filter((a) => w.areas[a.key]?.ok).map((a) => a.area),
+  }
+}
+
+// ---------- Service-call estimate ----------
+
+// Price book lines a tech can put in an option (the service call itself is added automatically).
+export const isPickable = (row: { category: string }) => row.category !== 'Diagnostic'
+
+// The short "what's included" line: the tech's own words, or built from the price book tasks.
+export function optionWhat(o: EstimateOptionWork, taskOf: (code: string) => string) {
+  if (o.what.trim()) return o.what.trim()
+  const counts = new Map<string, number>()
+  for (const c of o.codes) counts.set(c, (counts.get(c) ?? 0) + 1)
+  // Price book task names carry office notes like "(non-member)" that customers shouldn't see.
+  const clean = (t: string) => t.replace(/\s*\(non-member\)/i, '')
+  return [...counts].map(([c, n]) => (n > 1 ? `${clean(taskOf(c))} ×${n}` : clean(taskOf(c)))).join(', ')
+}
+
+// Why the estimate can't be sent yet (empty = ready). `target` is the element to scroll to.
+export function estimateBlockers(e: EstimateWork | undefined): { text: string; target: string }[] {
+  if (!e) return [{ text: 'Write what you found and add at least one option', target: 'est-found' }]
+  const out: { text: string; target: string }[] = []
+  if (!e.found.title.trim()) out.push({ text: 'Write what you found (the headline the customer sees)', target: 'est-found' })
+  if (e.options.length === 0) out.push({ text: 'Add at least one option', target: 'est-add' })
+  e.options.forEach((o, i) => {
+    const label = o.name.trim() || `Option ${i + 1}`
+    if (!o.name.trim()) out.push({ text: `Option ${i + 1} needs a name`, target: `est-${o.key}` })
+    if (o.codes.length === 0) out.push({ text: `${label}: pick at least one item from the price book`, target: `est-${o.key}` })
+  })
+  return out
+}
+
+export function toEstimateInput(v: Visit, e: EstimateWork, techName: string, today: string, taskOf: (code: string) => string): EstimateInput {
+  return {
+    id: v.id,
+    customer: v.customer,
+    address: v.address,
+    date: today,
+    techName,
+    trade: v.trade ?? 'HVAC',
+    found: e.found,
+    options: e.options.map((o) => ({
+      key: o.key,
+      name: o.name.trim(),
+      what: optionWhat(o, taskOf),
+      why: o.why.trim(),
+      codes: o.codes,
+      mostChosen: o.mostChosen,
+    })),
   }
 }

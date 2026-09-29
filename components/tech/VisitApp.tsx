@@ -9,10 +9,13 @@ import {
   areaTarget,
   checklistAreas,
   defaultTitle,
+  estimateBlockers,
   findingTarget,
+  newEstimate,
   selectedFindings,
   sendBlockers,
   toCheckupInput,
+  toEstimateInput,
   tradeOrder,
   tradeProgress,
   type Area,
@@ -21,9 +24,11 @@ import {
 } from '@/lib/tech'
 import type { GuideRow, PriceBookRow } from '@/lib/types'
 import { useVisitWork } from '@/lib/useVisitWork'
-import { buildReport } from '@/lib/views'
+import { buildEstimate, buildReport } from '@/lib/views'
 import CheckupReport from '../CheckupReport'
+import ServiceEstimate from '../ServiceEstimate'
 import { Card, Logo } from '../ui'
+import EstimateBuilder from './EstimateBuilder'
 import PhotoButton from './PhotoButton'
 
 type Section = 'home' | 'send' | string // trade key for checklist sections
@@ -74,7 +79,7 @@ export default function VisitApp({
 
   if (preview) {
     const today = new Date().toISOString().slice(0, 10)
-    const report = buildReport(toCheckupInput(visit, work, areas, catalog.guide, techName, today), catalog)
+    const taskOf = (c: string) => catalog.book.get(c)?.task ?? c
     return (
       <>
         <div className="sticky top-0 z-20 flex items-center justify-between gap-3 bg-[#0B1528] px-4 py-2 text-sm text-white">
@@ -83,7 +88,11 @@ export default function VisitApp({
             Back to visit
           </button>
         </div>
-        <CheckupReport report={report} />
+        {checkup ? (
+          <CheckupReport report={buildReport(toCheckupInput(visit, work, areas, catalog.guide, techName, today), catalog)} />
+        ) : (
+          <ServiceEstimate estimate={buildEstimate(toEstimateInput(visit, work.estimate ?? newEstimate(), techName, today, taskOf), catalog)} />
+        )}
       </>
     )
   }
@@ -98,7 +107,14 @@ export default function VisitApp({
           }),
           { id: 'send', label: 'Review & send' },
         ]
-      : [{ id: 'send', label: 'Estimate' }]),
+      : [
+          {
+            id: 'send',
+            label: 'Estimate',
+            badge: `${work.estimate?.options.length ?? 0} options`,
+            done: estimateBlockers(work.estimate).length === 0,
+          },
+        ]),
   ]
 
   return (
@@ -182,17 +198,18 @@ export default function VisitApp({
                 onGoTo={go}
               />
             ) : (
-              <Card className="flex flex-col gap-2">
-                <div className="text-lg font-bold">Service-call estimate</div>
-                <div className="text-[15px] text-body">
-                  Building the options (Repair / Repair + tune-up / Replace) from the price book comes in a next step. For now, the customer
-                  estimate page is at{' '}
-                  <Link href="/estimate/demo" className="font-semibold text-link underline">
-                    /estimate/demo
-                  </Link>
-                  .
-                </div>
-              </Card>
+              <EstimateBuilder
+                visit={visit}
+                work={work}
+                update={update}
+                book={catalog.book}
+                highlight={highlight}
+                onPreview={() => {
+                  setPreview(true)
+                  window.scrollTo(0, 0)
+                }}
+                onGoTo={(t) => go('send', t)}
+              />
             ))}
         </main>
       </div>

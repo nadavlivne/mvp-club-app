@@ -88,7 +88,7 @@ export type EstimateInput = {
   date: string
   techName: string
   trade: string
-  found: { title: string; detail: string }
+  found: { title: string; detail: string; photo?: string }
   options: { key: string; name: string; what: string; why: string; codes: string[]; mostChosen?: boolean }[]
 }
 
@@ -108,7 +108,7 @@ export type EstimateView = {
   dateText: string
   techName: string
   tradeColor: string
-  found: { title: string; detail: string }
+  found: { title: string; detail: string; photo?: string }
   alreadyMember: boolean
   serviceCall: { standard: number; member: number }
   options: EstimateOption[]
