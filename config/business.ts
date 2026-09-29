@@ -48,6 +48,13 @@ export const visitSlots = [
 // How many upcoming weekdays to offer.
 export const visitDaysOffered = 4
 
+// Customer-facing wording for price book lines in the "Diagnostic" category
+// (the $19 member / $119 non-member specialist visit).
+export const diagnosticCopy = {
+  note: 'specialist visit',
+  detail: 'A specialist comes out to find the cause. Any repair is priced for you before we do it.',
+}
+
 export const company = {
   phone: '[MVP PHONE]',
 }

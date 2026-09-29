@@ -2,7 +2,7 @@
 // every item in the inspection guide and the price book so nobody can type a
 // price. Pure functions: used on the server (customer page) and in the tech
 // app (report preview).
-import { membership, serviceCallCode, tradeInfo, type Rating } from '@/config/business'
+import { diagnosticCopy, membership, serviceCallCode, tradeInfo, type Rating } from '@/config/business'
 import { daysAsMember, priceLine, priceLines } from './pricing'
 import type { Customer, GuideRow, PriceBookRow } from './types'
 
@@ -31,6 +31,7 @@ export type ReportItem = {
   title: string
   reason: string
   photo?: string
+  detail: string // one plain line under the title on the approve screen (may be empty)
   price: number | null // null = needs a quote
   standard: number | null
   note: string
@@ -59,12 +60,15 @@ export function buildReport(input: CheckupInput, { guide, book }: Catalog, today
       reason: [f.techNote, g.customerMessage].filter(Boolean).join(' '),
     }
     if (!g.pricebookCode || g.pricebookCode === 'Quote') {
-      return { ...base, price: null, standard: null, note: '' }
+      return { ...base, detail: '', price: null, standard: null, note: '' }
     }
     const row = book.get(g.pricebookCode)
     if (!row) throw new Error(`${g.id}: price book code ${g.pricebookCode} not found`)
     const p = priceLine(row, input.customer, today)
-    return { ...base, price: p.price, standard: p.standard, note: p.note }
+    if (row.category === 'Diagnostic') {
+      return { ...base, detail: diagnosticCopy.detail, price: p.price, standard: p.standard, note: diagnosticCopy.note }
+    }
+    return { ...base, detail: row.task, price: p.price, standard: p.standard, note: p.note }
   })
   return {
     address: input.address,

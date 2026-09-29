@@ -68,7 +68,7 @@ export function tradeProgress(w: VisitWork, areas: Area[], trade: string) {
 
 export const selectedFindings = (w: VisitWork) => Object.values(w.areas).flatMap((a) => a.findings)
 
-export const defaultTitle = (g: GuideRow) => `${g.area}: ${g.recommend}`
+export const defaultTitle = (g: GuideRow) => g.customerTitle || `${g.area}: ${g.recommend}`
 
 // Why the check-up can't be sent yet (empty = ready). Rules from CLAUDE.md.
 // Each blocker says where to fix it: the trade section and the element to scroll to.

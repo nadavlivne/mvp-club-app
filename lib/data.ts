@@ -46,6 +46,7 @@ export function loadInspectionGuide(): Map<string, GuideRow> {
     rating: r.rating as Rating,
     recommend: r.recommend,
     pricebookCode: r.pricebook_code,
+    customerTitle: r.customer_title,
     customerMessage: r.customer_message,
   }))
   return new Map(rows.map((r) => [r.id, r]))

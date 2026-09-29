@@ -119,27 +119,49 @@ export default function CheckupReport({ report }: { report: ReportView }) {
 
       {screen === 'approve' && (
         <main className="mx-auto flex max-w-xl flex-col gap-3.5 px-4 pt-4 pb-6">
-          <LineItems
-            lines={cart.map((c) => ({ label: c.title, amount: c.price ?? 0 }))}
-            footer={
-              <>
-                <div className="flex justify-between border-t border-line pt-2.5 text-[17px] font-bold">
-                  <span>Total</span>
-                  <span>{money(total)}</span>
+          <p className="text-[15px] leading-snug text-body">
+            Three quick steps: check your items, pick a day, then sign. You pay only after the work is done.
+          </p>
+
+          <Card className="flex flex-col gap-3">
+            <StepTitle n={1}>Your items</StepTitle>
+            {cart.map((c) => (
+              <div key={c.key} className="flex justify-between gap-3">
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-[15px] font-semibold">{c.title}</span>
+                  {c.detail && <span className="text-[13px] leading-snug text-muted">{c.detail}</span>}
                 </div>
-                {saveLine && <div className="text-[13px] font-semibold text-success">{saveLine}</div>}
-              </>
-            }
-          />
-          <VisitPicker day={day} slot={slot} onDay={setDay} onSlot={setSlot} />
+                <div className="flex shrink-0 flex-col items-end">
+                  <span className="text-[15px] font-bold">{c.price === 0 ? 'Included' : money(c.price ?? 0)}</span>
+                  {c.standard !== null && c.price !== null && c.standard > c.price && (
+                    <span className="text-[13px] text-muted">
+                      regular <span className="line-through">{money(c.standard)}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+            <div className="flex justify-between border-t border-line pt-2.5 text-[17px] font-bold">
+              <span>Total</span>
+              <span>{money(total)}</span>
+            </div>
+            {save > 0 && (
+              <div className="text-[13px] font-semibold text-success">
+                Your member prices save you {money(save)} compared with regular prices.
+              </div>
+            )}
+          </Card>
+
+          <VisitPicker day={day} slot={slot} onDay={setDay} onSlot={setSlot} title={<StepTitle n={2}>Pick a day for the work</StepTitle>} />
+
           <Card className="flex flex-col gap-2.5">
-            <div className="text-base font-bold">Sign to approve</div>
+            <StepTitle n={3}>Sign to approve</StepTitle>
             <SignaturePad onChange={setSigned} />
             <div className="text-xs leading-[1.45] text-muted">{legal.checkupApproval}</div>
           </Card>
           <ApproveButton
             ready={ready}
-            label={ready ? `Approve ${money(total)}` : day === null ? 'Pick a day to continue' : 'Sign to continue'}
+            label={ready ? `Approve ${money(total)}` : day === null ? 'Step 2: pick a day to continue' : 'Step 3: sign to continue'}
             onClick={() => ready && go('done')}
           />
           <LinkButton onClick={() => go('report')}>Back to report</LinkButton>
@@ -171,6 +193,15 @@ export default function CheckupReport({ report }: { report: ReportView }) {
         </main>
       )}
     </>
+  )
+}
+
+function StepTitle({ n, children }: { n: number; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2.5 text-base font-bold">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-navy text-sm text-white">{n}</span>
+      {children}
+    </div>
   )
 }
 

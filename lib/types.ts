@@ -22,6 +22,7 @@ export type GuideRow = {
   rating: Rating
   recommend: string
   pricebookCode: string // a price book code, "Quote", or empty
+  customerTitle: string // plain-words name the customer sees
   customerMessage: string
 }
 

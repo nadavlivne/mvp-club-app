@@ -37,16 +37,18 @@ export default function VisitPicker({
   slot,
   onDay,
   onSlot,
+  title,
 }: {
   day: VisitDay | null
   slot: string
   onDay: (d: VisitDay) => void
   onSlot: (s: string) => void
+  title?: React.ReactNode
 }) {
   const days = useMemo(() => upcomingDays(), [])
   return (
     <Card className="flex flex-col gap-2.5">
-      <div className="text-base font-bold">When should we come?</div>
+      {title ?? <div className="text-base font-bold">When should we come?</div>}
       <div className="grid grid-cols-4 gap-2">
         {days.map((d) => (
           <button key={d.iso} type="button" className={pill(day?.iso === d.iso)} onClick={() => onDay(d)}>
