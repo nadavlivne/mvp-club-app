@@ -204,7 +204,7 @@ function ItemCard({
       <div className="h-1" style={{ background: item.tradeColor }} />
       <div className="flex flex-col gap-2.5 px-4 py-3.5">
         <div className="flex gap-3">
-          <PhotoPlaceholder label="Photo from the check-up" />
+          <PhotoPlaceholder label="Photo from the check-up" src={item.photo} />
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: badge.bg, color: badge.fg }}>

@@ -37,7 +37,11 @@ export function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="mt-1 font-display text-lg font-bold tracking-[0.06em] text-muted">{children}</h2>
 }
 
-export function PhotoPlaceholder({ label }: { label: string }) {
+export function PhotoPlaceholder({ label, src }: { label: string; src?: string }) {
+  if (src) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt={label} className="size-[72px] shrink-0 rounded-lg object-cover" />
+  }
   return (
     <div role="img" aria-label={label} className="flex size-[72px] shrink-0 items-center justify-center rounded-lg bg-photo">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7688" strokeWidth="1.6">

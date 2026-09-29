@@ -28,10 +28,20 @@ export function loadPriceBook(): Map<string, PriceBookRow> {
 }
 
 export function loadInspectionGuide(): Map<string, GuideRow> {
+  const lastHow = new Map<string, string>()
   const rows = readCsv('inspection_guide.csv').map<GuideRow>((r) => ({
     id: r.id,
     trade: r.trade,
     area: r.area,
+    howToCheck: (() => {
+      const key = r.trade + '|' + r.area
+      const how = r.how_to_check.startsWith('Same')
+        ? (lastHow.get(key) ?? '') + r.how_to_check.slice(4)
+        : r.how_to_check
+      lastHow.set(key, how)
+      return how
+    })(),
+    whoCanCheck: r.who_can_check,
     finding: r.finding,
     rating: r.rating as Rating,
     recommend: r.recommend,
@@ -43,4 +53,8 @@ export function loadInspectionGuide(): Map<string, GuideRow> {
 
 export function readSample<T>(name: string): T {
   return JSON.parse(fs.readFileSync(path.join(dataDir, 'samples', name), 'utf8')) as T
+}
+
+export function loadCatalog() {
+  return { guide: loadInspectionGuide(), book: loadPriceBook() }
 }

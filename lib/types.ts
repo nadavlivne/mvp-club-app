@@ -16,6 +16,8 @@ export type GuideRow = {
   id: string
   trade: string
   area: string
+  howToCheck: string // "Same" in the CSV is filled in from the row above
+  whoCanCheck: string
   finding: string
   rating: Rating
   recommend: string

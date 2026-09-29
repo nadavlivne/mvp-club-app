@@ -1,11 +1,12 @@
-// Server-only: turns a saved check-up / estimate (sample JSON for now) into
-// what the customer page shows, looking up every item in the inspection guide
-// and the price book so nobody can type a price.
-import 'server-only'
+// Turns a check-up / estimate into what the customer page shows, looking up
+// every item in the inspection guide and the price book so nobody can type a
+// price. Pure functions: used on the server (customer page) and in the tech
+// app (report preview).
 import { membership, serviceCallCode, tradeInfo, type Rating } from '@/config/business'
-import { loadInspectionGuide, loadPriceBook } from './data'
 import { daysAsMember, priceLine, priceLines } from './pricing'
-import type { Customer, PriceBookRow } from './types'
+import type { Customer, GuideRow, PriceBookRow } from './types'
+
+export type Catalog = { guide: Map<string, GuideRow>; book: Map<string, PriceBookRow> }
 
 const fmtDate = (iso: string) =>
   new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -18,7 +19,7 @@ export type CheckupInput = {
   address: string
   date: string
   techName: string
-  findings: { key: string; guideId: string; title: string; techNote?: string }[]
+  findings: { key: string; guideId: string; title: string; techNote?: string; photo?: string }[]
   checkedOk: string[]
 }
 
@@ -29,6 +30,7 @@ export type ReportItem = {
   tradeColor: string
   title: string
   reason: string
+  photo?: string
   price: number | null // null = needs a quote
   standard: number | null
   note: string
@@ -42,9 +44,7 @@ export type ReportView = {
   checkedOk: string[]
 }
 
-export function buildReport(input: CheckupInput, today = new Date()): ReportView {
-  const guide = loadInspectionGuide()
-  const book = loadPriceBook()
+export function buildReport(input: CheckupInput, { guide, book }: Catalog, today = new Date()): ReportView {
   const items = input.findings.map<ReportItem>((f) => {
     const g = guide.get(f.guideId)
     if (!g) throw new Error(`Finding ${f.key}: ${f.guideId} is not in data/inspection_guide.csv`)
@@ -55,6 +55,7 @@ export function buildReport(input: CheckupInput, today = new Date()): ReportView
       tradeLabel: trade.label,
       tradeColor: trade.color,
       title: f.title,
+      photo: f.photo,
       reason: [f.techNote, g.customerMessage].filter(Boolean).join(' '),
     }
     if (!g.pricebookCode || g.pricebookCode === 'Quote') {
@@ -109,8 +110,7 @@ export type EstimateView = {
   options: EstimateOption[]
 }
 
-export function buildEstimate(input: EstimateInput, today = new Date()): EstimateView {
-  const book = loadPriceBook()
+export function buildEstimate(input: EstimateInput, { book }: Catalog, today = new Date()): EstimateView {
   const get = (code: string): PriceBookRow => {
     const row = book.get(code)
     if (!row) throw new Error(`Price book code ${code} not found`)

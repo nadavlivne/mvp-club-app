@@ -25,6 +25,13 @@ export default function Home() {
             <span className="text-sm text-body">What a non-member sees on a repair call, with “Join MVP Club today”.</span>
           </Card>
         </Link>
+        <h2 className="mt-3 font-display text-[22px] font-bold">Tech app (tablet)</h2>
+        <Link href="/tech">
+          <Card className="flex flex-col gap-1 border-l-4 border-[#F2B705]">
+            <span className="text-lg font-bold">Today&apos;s visits</span>
+            <span className="text-sm text-body">Pick a van, open a visit, fill the home profile and the three-trade checklist, preview and send.</span>
+          </Card>
+        </Link>
       </main>
     </>
   )

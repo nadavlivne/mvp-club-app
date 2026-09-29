@@ -1,0 +1,85 @@
+{
+  "_note": "Sample day for the tech app. Van, tech and customer names are placeholders. Phase 2 loads this from the database and Housecall Pro.",
+  "vans": [
+    { "id": "van-1", "name": "Van 1", "tech": "Chris" },
+    { "id": "van-2", "name": "Van 2", "tech": "Jordan" },
+    { "id": "van-3", "name": "Van 3", "tech": "Sam" }
+  ],
+  "visits": [
+    {
+      "id": "v101",
+      "vanId": "van-1",
+      "window": "8:00–10:00",
+      "kind": "checkup",
+      "season": "fall",
+      "customer": { "name": "Sample customer A", "isMember": true, "memberSince": "2025-10-01" },
+      "address": "123 Sample St, Cincinnati",
+      "homeYear": 1988,
+      "equipment": [
+        { "id": "e1", "type": "Furnace", "brand": "Carrier", "model": "58STA090", "year": 2009 },
+        { "id": "e2", "type": "AC condenser", "brand": "Carrier", "model": "24ABB336", "year": 2009 },
+        { "id": "e3", "type": "Water heater", "brand": "A.O. Smith", "model": "GCR-40", "year": 2015 },
+        { "id": "e4", "type": "Electrical panel", "brand": "Square D", "model": "QO 200A", "year": 1988 },
+        { "id": "e5", "type": "Sump pump", "brand": "Zoeller", "model": "M53", "year": 2019 }
+      ]
+    },
+    {
+      "id": "v102",
+      "vanId": "van-1",
+      "window": "10:30–12:30",
+      "kind": "checkup",
+      "season": "fall",
+      "customer": { "name": "Sample customer B", "isMember": true, "memberSince": "2026-08-15" },
+      "address": "88 Example Ave, Cincinnati",
+      "homeYear": 2004,
+      "equipment": [
+        { "id": "e1", "type": "Furnace", "brand": "Trane", "model": "S9V2", "year": 2018 },
+        { "id": "e2", "type": "AC condenser", "brand": "Trane", "model": "XR14", "year": 2018 },
+        { "id": "e3", "type": "Water heater", "brand": "Rheem", "model": "XG50T", "year": 2013 }
+      ]
+    },
+    {
+      "id": "v103",
+      "vanId": "van-1",
+      "window": "1:30–3:30",
+      "kind": "service",
+      "trade": "HVAC",
+      "complaint": "AC not cooling",
+      "customer": { "name": "Sample customer C", "isMember": false },
+      "address": "456 Example Ave, Cincinnati",
+      "homeYear": 1995,
+      "equipment": [
+        { "id": "e1", "type": "AC condenser", "brand": "Goodman", "model": "GSX13", "year": 2009 }
+      ]
+    },
+    {
+      "id": "v201",
+      "vanId": "van-2",
+      "window": "8:00–10:00",
+      "kind": "checkup",
+      "season": "fall",
+      "customer": { "name": "Sample customer D", "isMember": true, "memberSince": "2025-03-01" },
+      "address": "12 Placeholder Ln, Cincinnati",
+      "homeYear": 1972,
+      "equipment": [
+        { "id": "e1", "type": "Furnace", "brand": "Lennox", "model": "G40", "year": 2004 },
+        { "id": "e2", "type": "Water heater", "brand": "Bradford White", "model": "M4403", "year": 2012 },
+        { "id": "e3", "type": "Electrical panel", "brand": "Federal Pacific", "model": "Stab-Lok 100A", "year": 1972 }
+      ]
+    },
+    {
+      "id": "v301",
+      "vanId": "van-3",
+      "window": "9:00–11:00",
+      "kind": "checkup",
+      "season": "fall",
+      "customer": { "name": "Sample customer E", "isMember": true, "memberSince": "2026-01-10" },
+      "address": "7 Demo Ct, Cincinnati",
+      "homeYear": 2011,
+      "equipment": [
+        { "id": "e1", "type": "Furnace", "brand": "Goodman", "model": "GMVC96", "year": 2011 },
+        { "id": "e2", "type": "Water heater", "brand": "Rheem", "model": "PROG40", "year": 2011 }
+      ]
+    }
+  ]
+}
