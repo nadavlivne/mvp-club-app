@@ -5,19 +5,10 @@ import { company, ratings, visitSlots } from '@/config/business'
 import { legal } from '@/config/legal'
 import { money } from '@/lib/pricing'
 import type { ReportItem, ReportView } from '@/lib/views'
+import Photo from './Photo'
 import SignaturePad from './SignaturePad'
 import VisitPicker, { type VisitDay } from './VisitPicker'
-import {
-  ApproveButton,
-  BottomBar,
-  Card,
-  DoneCard,
-  Header,
-  LineItems,
-  LinkButton,
-  PhotoPlaceholder,
-  SectionTitle,
-} from './ui'
+import { ApproveButton, BottomBar, Card, DoneCard, Header, LineItems, LinkButton, SectionTitle } from './ui'
 
 type Screen = 'report' | 'approve' | 'done'
 
@@ -235,7 +226,7 @@ function ItemCard({
       <div className="h-1" style={{ background: item.tradeColor }} />
       <div className="flex flex-col gap-2.5 px-4 py-3.5">
         <div className="flex gap-3">
-          <PhotoPlaceholder label="Photo from the check-up" src={item.photo} />
+          <Photo label="Photo from the check-up" src={item.photo} />
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: badge.bg, color: badge.fg }}>

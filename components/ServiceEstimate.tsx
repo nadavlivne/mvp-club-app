@@ -6,7 +6,8 @@ import { legal } from '@/config/legal'
 import { money } from '@/lib/pricing'
 import type { EstimateOption, EstimateView } from '@/lib/views'
 import SignaturePad from './SignaturePad'
-import { ApproveButton, BottomBar, Card, DoneCard, Header, LineItems, LinkButton, PhotoPlaceholder, SectionTitle } from './ui'
+import Photo from './Photo'
+import { ApproveButton, BottomBar, Card, DoneCard, Header, LineItems, LinkButton, SectionTitle } from './ui'
 
 type Screen = 'est' | 'approve' | 'done'
 
@@ -45,7 +46,7 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
           <div className="flex flex-col overflow-hidden rounded-xl bg-white">
             <div className="h-1" style={{ background: estimate.tradeColor }} />
             <div className="flex gap-3 px-4 py-3.5">
-              <PhotoPlaceholder label="Photo of the problem" src={estimate.found.photo} />
+              <Photo label="Photo of the problem" src={estimate.found.photo} />
               <div className="flex flex-col gap-1">
                 <div className="text-xs font-bold tracking-[0.06em] text-muted">WHAT WE FOUND</div>
                 <div className="text-base leading-tight font-bold">{estimate.found.title}</div>

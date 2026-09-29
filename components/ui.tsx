@@ -41,22 +41,6 @@ export function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="mt-1 font-display text-lg font-bold tracking-[0.06em] text-muted">{children}</h2>
 }
 
-export function PhotoPlaceholder({ label, src }: { label: string; src?: string }) {
-  if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={label} className="size-[72px] shrink-0 rounded-lg object-cover" />
-  }
-  return (
-    <div role="img" aria-label={label} className="flex size-[72px] shrink-0 items-center justify-center rounded-lg bg-photo">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7688" strokeWidth="1.6">
-        <rect x="3" y="6" width="18" height="14" rx="2" />
-        <circle cx="12" cy="13" r="3.5" />
-        <path d="M8 6l1.5-2h5L16 6" />
-      </svg>
-    </div>
-  )
-}
-
 export function LineItems({ lines, footer }: { lines: { label: string; amount: number }[]; footer?: React.ReactNode }) {
   return (
     <Card className="flex flex-col gap-2.5">
