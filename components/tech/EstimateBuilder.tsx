@@ -16,6 +16,7 @@ import {
 import type { Customer, PriceBookRow } from '@/lib/types'
 import { Card } from '../ui'
 import PhotoButton from './PhotoButton'
+import SendControls, { type SendState } from './SendControls'
 
 type Update = (fn: (w: VisitWork) => VisitWork) => void
 
@@ -32,6 +33,7 @@ export default function EstimateBuilder({
   highlight,
   onPreview,
   onGoTo,
+  send,
 }: {
   visit: Visit
   work: VisitWork
@@ -40,6 +42,7 @@ export default function EstimateBuilder({
   highlight: string | null
   onPreview: () => void
   onGoTo: (target: string) => void
+  send: SendState
 }) {
   const est = work.estimate ?? newEstimate()
   const setEst = (fn: (e: EstimateWork) => EstimateWork) => update((w) => ({ ...w, estimate: fn(w.estimate ?? newEstimate()) }))
@@ -165,22 +168,8 @@ export default function EstimateBuilder({
         >
           Preview customer estimate
         </button>
-        <button
-          type="button"
-          disabled={blockers.length > 0}
-          onClick={() => update((w) => ({ ...w, sentAt: new Date().toISOString() }))}
-          className={`h-[52px] rounded-xl text-[17px] font-bold ${blockers.length ? 'bg-line text-muted' : 'bg-approve text-white'}`}
-        >
-          Send estimate
-        </button>
+        <SendControls label="Send estimate" blocked={blockers.length > 0} send={send} work={work} />
       </div>
-      {work.sentAt && (
-        <Card className="text-sm text-body">
-          Estimate marked as sent at {new Date(work.sentAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}. Texting the
-          customer their link comes with the database step — for now nothing is sent. You can also hand the tablet to the customer on the
-          preview.
-        </Card>
-      )}
     </>
   )
 }

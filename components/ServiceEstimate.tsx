@@ -1,27 +1,62 @@
 'use client'
 
 import { useState } from 'react'
-import { membership } from '@/config/business'
+import { company, membership } from '@/config/business'
 import { legal } from '@/config/legal'
 import { money } from '@/lib/pricing'
 import type { EstimateOption, EstimateView } from '@/lib/views'
+import { submitApproval } from '@/app/r/actions'
+import type { Approved } from './CheckupReport'
 import SignaturePad from './SignaturePad'
 import Photo from './Photo'
 import { ApproveButton, BottomBar, Card, DoneCard, Header, LineItems, LinkButton, SectionTitle } from './ui'
 
 type Screen = 'est' | 'approve' | 'done'
 
-export default function ServiceEstimate({ estimate }: { estimate: EstimateView }) {
+// `token` is set on a real customer link (approvals are saved); without it this is the sample.
+export default function ServiceEstimate({
+  estimate,
+  token,
+  approved = null,
+}: {
+  estimate: EstimateView
+  token?: string
+  approved?: Approved
+}) {
   const firstKey = estimate.options[0]?.key
-  const [screen, setScreen] = useState<Screen>('est')
+  const [screen, setScreen] = useState<Screen>(approved ? 'done' : 'est')
   const [joinToggle, setJoin] = useState(false)
   const [pick, setPick] = useState(firstKey)
-  const [signed, setSigned] = useState(false)
+  const [signature, setSignature] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const signed = !!signature
 
   const go = (s: Screen) => {
     setScreen(s)
-    if (s !== 'approve') setSigned(false)
+    if (s !== 'approve') setSignature(null)
+    setError(null)
     window.scrollTo(0, 0)
+  }
+
+  const approve = async () => {
+    if (!signature) return
+    if (!token) return go('done') // sample page: nothing is saved
+    setSaving(true)
+    setError(null)
+    try {
+      const r = await submitApproval(token, { kind: 'estimate', optionKey: p.key, joined: joinToggle }, signature)
+      if ('error' in r) setError(r.error)
+      else {
+        setSignature(null)
+        setScreen('done')
+        window.scrollTo(0, 0)
+      }
+    } catch {
+      setError('No connection. Please check your internet and try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   // Existing members always get member prices; non-members get them by joining today.
@@ -71,7 +106,9 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
                     : `Members pay ${money(estimate.serviceCall.member)} for the service call and less on repairs: save ${money(save)} today.`}
                 </div>
               </div>
-              <div className={`box-border flex h-[30px] w-[50px] shrink-0 items-center rounded-full p-[3px] ${joinToggle ? 'justify-end bg-success' : 'justify-start bg-edge'}`}>
+              <div
+                className={`box-border flex h-[30px] w-[50px] shrink-0 items-center rounded-full p-[3px] ${joinToggle ? 'justify-end bg-success' : 'justify-start bg-edge'}`}
+              >
                 <div className="size-6 rounded-full bg-white" />
               </div>
             </button>
@@ -81,9 +118,12 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
           {estimate.options.map((o) => {
             const on = o.key === p.key
             const discounted = o.member < o.standard
-            const note = o.laterCredit > 0 && !discounted
-              ? `${money(o.laterCredit)} member credit after ${membership.creditWaitDays} days`
-              : member ? 'member price' : `members ${money(o.member)}`
+            const note =
+              o.laterCredit > 0 && !discounted
+                ? `${money(o.laterCredit)} member credit after ${membership.creditWaitDays} days`
+                : member
+                  ? 'member price'
+                  : `members ${money(o.member)}`
             return (
               <button
                 key={o.key}
@@ -99,7 +139,9 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
                     </div>
                     <div className="text-[17px] font-bold">{o.name}</div>
                   </div>
-                  {o.mostChosen && <span className="rounded-full bg-[#FFF1CC] px-2 py-0.5 text-xs font-bold text-[#6B4700]">Most chosen</span>}
+                  {o.mostChosen && (
+                    <span className="rounded-full bg-[#FFF1CC] px-2 py-0.5 text-xs font-bold text-[#6B4700]">Most chosen</span>
+                  )}
                 </div>
                 <div className="text-[15px] font-semibold">{o.what}</div>
                 <div className="text-sm leading-[1.4] text-body">{o.why}</div>
@@ -120,7 +162,11 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
                 {p.name} + {money(fee)} service call
               </div>
             </div>
-            <button type="button" onClick={() => go('approve')} className="h-12 shrink-0 rounded-[10px] bg-approve px-[18px] text-base font-bold text-white">
+            <button
+              type="button"
+              onClick={() => go('approve')}
+              className="h-12 shrink-0 rounded-[10px] bg-approve px-[18px] text-base font-bold text-white"
+            >
               Review &amp; approve
             </button>
           </BottomBar>
@@ -142,7 +188,8 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
                 </div>
                 {joiningToday && (
                   <div className="rounded-lg bg-success-bg px-3 py-2.5 text-sm leading-[1.4]">
-                    <b>MVP Club membership</b> {legal.membershipTerms(membership.monthly, membership.firstTermMonths)} You saved {money(save)} on this visit.
+                    <b>MVP Club membership</b> {legal.membershipTerms(membership.monthly, membership.firstTermMonths)} You saved{' '}
+                    {money(save)} on this visit.
                   </div>
                 )}
               </>
@@ -150,30 +197,43 @@ export default function ServiceEstimate({ estimate }: { estimate: EstimateView }
           />
           <Card className="flex flex-col gap-2.5">
             <div className="text-base font-bold">Sign to approve</div>
-            <SignaturePad onChange={setSigned} />
+            <SignaturePad onChange={setSignature} />
             <div className="text-xs leading-[1.45] text-muted">{legal.emergencyWaiver}</div>
           </Card>
-          <ApproveButton ready={signed} label={signed ? `Approve ${money(total)}` : 'Sign to continue'} onClick={() => signed && go('done')} />
+          {error && <Card className="border-2 border-alert text-sm font-semibold text-alert">{error}</Card>}
+          <ApproveButton
+            ready={signed && !saving}
+            label={saving ? 'Saving your approval…' : signed ? `Approve ${money(total)}` : 'Sign to continue'}
+            onClick={approve}
+          />
           <LinkButton onClick={() => go('est')}>Back to options</LinkButton>
         </main>
       )}
 
       {screen === 'done' && (
         <main className="mx-auto flex max-w-xl flex-col gap-3.5 px-4 py-6">
-          <DoneCard
-            line={`${joiningToday ? 'Welcome to MVP Club. ' : ''}Your tech is starting the work now. You’ll get the invoice and a copy of this approval by text and email.`}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setJoin(false)
-              setPick(firstKey)
-              go('est')
-            }}
-            className="h-11 rounded-[10px] border border-edge bg-white text-[15px] font-semibold text-navy"
-          >
-            Start the demo over
-          </button>
+          {approved ? (
+            <DoneCard
+              line={`Approved on ${new Date(approved.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: ${String((approved.details.option as { name?: string })?.name ?? '')}, ${money(Number(approved.details.total ?? 0))}. Questions? Call ${company.phone}.`}
+            />
+          ) : (
+            <DoneCard
+              line={`${joiningToday ? 'Welcome to MVP Club. ' : ''}Your tech is starting the work now. You’ll get the invoice and a copy of this approval by text and email.`}
+            />
+          )}
+          {!token && (
+            <button
+              type="button"
+              onClick={() => {
+                setJoin(false)
+                setPick(firstKey)
+                go('est')
+              }}
+              className="h-11 rounded-[10px] border border-edge bg-white text-[15px] font-semibold text-navy"
+            >
+              Start the demo over
+            </button>
+          )}
         </main>
       )}
     </>

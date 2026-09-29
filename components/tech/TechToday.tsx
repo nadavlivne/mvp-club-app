@@ -1,28 +1,36 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { tradeInfo } from '@/config/business'
-import { checklistAreas, tradeOrder, tradeProgress, type TechDay, type VisitWork } from '@/lib/tech'
+import { loadSampleDay, signOut } from '@/app/tech/actions'
+import { checklistAreas, newWork, tradeOrder, tradeProgress, type TechDay, type Visit, type VisitWork } from '@/lib/tech'
 import type { GuideRow } from '@/lib/types'
 import { readWork } from '@/lib/useVisitWork'
 import { Card, Logo } from '../ui'
 
 const VAN_KEY = 'mvp-tech-van'
 
-export default function TechToday({ day, guide, dateText }: { day: TechDay; guide: GuideRow[]; dateText: string }) {
-  const [vanId, setVanId] = useState(day.vans[0].id)
-  const [works, setWorks] = useState<Record<string, VisitWork>>({})
-  const areas = useMemo(() => checklistAreas(guide), [guide])
+type Props = { guide: GuideRow[]; dateText: string } & (
+  | { mode: 'sample'; day: TechDay }
+  | { mode: 'db'; tech: { name: string; van: string }; visits: Visit[]; works: Record<string, VisitWork | null> }
+)
 
+export default function TechToday(props: Props) {
+  const areas = useMemo(() => checklistAreas(props.guide), [props.guide])
+
+  // Sample mode: pick a van, work kept on the device.
+  const sampleDay = props.mode === 'sample' ? props.day : null
+  const [vanId, setVanId] = useState(sampleDay?.vans[0].id ?? '')
+  const [deviceWorks, setDeviceWorks] = useState<Record<string, VisitWork>>({})
   useEffect(() => {
+    if (!sampleDay) return
     try {
       const saved = localStorage.getItem(VAN_KEY)
-      if (saved && day.vans.some((v) => v.id === saved)) setVanId(saved)
+      if (saved && sampleDay.vans.some((v) => v.id === saved)) setVanId(saved)
     } catch {}
-    setWorks(Object.fromEntries(day.visits.map((v) => [v.id, readWork(v)])))
-  }, [day])
-
+    setDeviceWorks(Object.fromEntries(sampleDay.visits.map((v) => [v.id, readWork(v)])))
+  }, [sampleDay])
   const pickVan = (id: string) => {
     setVanId(id)
     try {
@@ -30,42 +38,86 @@ export default function TechToday({ day, guide, dateText }: { day: TechDay; guid
     } catch {}
   }
 
-  const van = day.vans.find((v) => v.id === vanId)!
-  const visits = day.visits.filter((v) => v.vanId === vanId)
+  const [loading, startLoading] = useTransition()
+
+  let visits: Visit[]
+  let who: string
+  let workOf: (v: Visit) => VisitWork | undefined
+  if (props.mode === 'sample') {
+    const van = props.day.vans.find((v) => v.id === vanId)!
+    visits = props.day.visits.filter((v) => v.vanId === vanId)
+    who = `${van.name} · ${van.tech}`
+    workOf = (v) => deviceWorks[v.id]
+  } else {
+    visits = props.visits
+    who = [props.tech.van, props.tech.name].filter(Boolean).join(' · ')
+    workOf = (v) => ({ ...newWork(v), ...(props.works[v.id] ?? {}) })
+  }
 
   return (
     <>
       <header className="bg-navy text-white">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-5 pt-[18px] pb-4">
-          <Logo tagline="TECH" />
+          <div className="flex items-center justify-between gap-3">
+            <Logo tagline="TECH" />
+            {props.mode === 'db' && (
+              <form action={signOut}>
+                <button type="submit" className="flex h-11 items-center text-sm font-semibold text-sub">
+                  Sign out
+                </button>
+              </form>
+            )}
+          </div>
           <div className="flex flex-col gap-1">
             <h1 className="font-display text-[28px] leading-[1.05] font-bold">Today&apos;s visits</h1>
             <div className="text-sm text-sub">
-              {dateText} · {van.name} · {van.tech}
+              {props.dateText}
+              {who && ` · ${who}`}
             </div>
           </div>
         </div>
       </header>
       <main className="mx-auto flex max-w-5xl flex-col gap-3.5 px-4 py-4">
-        <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Van">
-          {day.vans.map((v) => (
-            <button
-              key={v.id}
-              type="button"
-              role="radio"
-              aria-checked={v.id === vanId}
-              onClick={() => pickVan(v.id)}
-              className={`h-12 rounded-[10px] border border-edge text-[15px] font-semibold ${v.id === vanId ? 'bg-navy text-white' : 'bg-white text-navy'}`}
-            >
-              {v.name} · {v.tech}
-            </button>
-          ))}
-        </div>
+        {sampleDay && (
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Van">
+            {sampleDay.vans.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                role="radio"
+                aria-checked={v.id === vanId}
+                onClick={() => pickVan(v.id)}
+                className={`h-12 rounded-[10px] border border-edge text-[15px] font-semibold ${v.id === vanId ? 'bg-navy text-white' : 'bg-white text-navy'}`}
+              >
+                {v.name} · {v.tech}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {visits.length === 0 && <Card className="text-body">No visits for this van today.</Card>}
+        {visits.length === 0 && (
+          <Card className="flex flex-col items-start gap-3 text-body">
+            <span>No visits assigned to you today.</span>
+            {props.mode === 'db' && (
+              <>
+                <span className="text-sm text-muted">
+                  Until Housecall Pro sends the schedule (phase 3), you can load four sample visits to try the app.
+                </span>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => startLoading(() => loadSampleDay())}
+                  className="h-11 rounded-[10px] bg-navy px-4 text-[15px] font-bold text-white"
+                >
+                  {loading ? 'Loading…' : 'Load sample visits for today'}
+                </button>
+              </>
+            )}
+          </Card>
+        )}
         <div className="grid gap-3.5 md:grid-cols-2">
           {visits.map((v) => {
-            const w = works[v.id]
+            const w = workOf(v)
             const checkup = v.kind === 'checkup'
             const done = w ? tradeOrder.filter((t) => tradeProgress(w, areas, t).complete).length : 0
             const options = w?.estimate?.options.length ?? 0
@@ -104,7 +156,9 @@ export default function TechToday({ day, guide, dateText }: { day: TechDay; guid
             )
           })}
         </div>
-        <div className="text-center text-xs text-muted">Sample day · vans, techs and customers are placeholders</div>
+        {props.mode === 'sample' && (
+          <div className="text-center text-xs text-muted">Sample day · vans, techs and customers are placeholders · work is kept on this device</div>
+        )}
       </main>
     </>
   )

@@ -5,6 +5,7 @@ import { company, ratings, visitSlots } from '@/config/business'
 import { legal } from '@/config/legal'
 import { money } from '@/lib/pricing'
 import type { ReportItem, ReportView } from '@/lib/views'
+import { submitApproval } from '@/app/r/actions'
 import Photo from './Photo'
 import SignaturePad from './SignaturePad'
 import VisitPicker, { type VisitDay } from './VisitPicker'
@@ -16,18 +17,56 @@ type Screen = 'report' | 'approve' | 'done'
 const startCart = (items: ReportItem[]) =>
   Object.fromEntries(items.filter((i) => i.rating === 'RED' && i.price !== null).map((i) => [i.key, true]))
 
-export default function CheckupReport({ report }: { report: ReportView }) {
-  const [screen, setScreen] = useState<Screen>('report')
+export type Approved = { at: string; details: Record<string, unknown> } | null
+
+// `token` is set on a real customer link (approvals are saved); without it this is the sample.
+export default function CheckupReport({ report, token, approved = null }: { report: ReportView; token?: string; approved?: Approved }) {
+  const [screen, setScreen] = useState<Screen>(approved ? 'done' : 'report')
   const [added, setAdded] = useState<Record<string, boolean>>(() => startCart(report.items))
   const [remind, setRemind] = useState<Record<string, boolean>>({})
   const [day, setDay] = useState<VisitDay | null>(null)
   const [slot, setSlot] = useState(visitSlots[0].id)
-  const [signed, setSigned] = useState(false)
+  const [signature, setSignature] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const signed = !!signature
 
   const go = (s: Screen) => {
     setScreen(s)
-    if (s !== 'approve') setSigned(false)
+    if (s !== 'approve') setSignature(null)
+    setError(null)
     window.scrollTo(0, 0)
+  }
+
+  const approve = async () => {
+    if (!ready || !day || !signature) return
+    if (!token) return go('done') // sample page: nothing is saved
+    setSaving(true)
+    setError(null)
+    try {
+      const r = await submitApproval(
+        token,
+        {
+          kind: 'report',
+          keys: cart.map((c) => c.key),
+          remind: Object.keys(remind).filter((k) => remind[k]),
+          day: day.iso,
+          dayLabel: day.long,
+          slot,
+        },
+        signature,
+      )
+      if ('error' in r) setError(r.error)
+      else {
+        setSignature(null)
+        setScreen('done')
+        window.scrollTo(0, 0)
+      }
+    } catch {
+      setError('No connection. Please check your internet and try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const nowList = report.items.filter((i) => i.rating === 'RED')
@@ -60,7 +99,12 @@ export default function CheckupReport({ report }: { report: ReportView }) {
 
           {nowList.length > 0 && <SectionTitle>NEEDS ATTENTION NOW</SectionTitle>}
           {nowList.map((item) => (
-            <ItemCard key={item.key} item={item} on={!!added[item.key]} onAdd={() => setAdded({ ...added, [item.key]: !added[item.key] })} />
+            <ItemCard
+              key={item.key}
+              item={item}
+              on={!!added[item.key]}
+              onAdd={() => setAdded({ ...added, [item.key]: !added[item.key] })}
+            />
           ))}
 
           {laterList.length > 0 && <SectionTitle>PLAN FOR THESE</SectionTitle>}
@@ -100,7 +144,11 @@ export default function CheckupReport({ report }: { report: ReportView }) {
                 </div>
                 {saveLine && <div className="text-[13px] font-semibold text-success">{saveLine}</div>}
               </div>
-              <button type="button" onClick={() => go('approve')} className="h-12 shrink-0 rounded-[10px] bg-approve px-[18px] text-base font-bold text-white">
+              <button
+                type="button"
+                onClick={() => go('approve')}
+                className="h-12 shrink-0 rounded-[10px] bg-approve px-[18px] text-base font-bold text-white"
+              >
                 Review &amp; approve
               </button>
             </BottomBar>
@@ -147,13 +195,22 @@ export default function CheckupReport({ report }: { report: ReportView }) {
 
           <Card className="flex flex-col gap-2.5">
             <StepTitle n={3}>Sign to approve</StepTitle>
-            <SignaturePad onChange={setSigned} />
+            <SignaturePad onChange={setSignature} />
             <div className="text-xs leading-[1.45] text-muted">{legal.checkupApproval}</div>
           </Card>
+          {error && <Card className="border-2 border-alert text-sm font-semibold text-alert">{error}</Card>}
           <ApproveButton
-            ready={ready}
-            label={ready ? `Approve ${money(total)}` : day === null ? 'Step 2: pick a day to continue' : 'Step 3: sign to continue'}
-            onClick={() => ready && go('done')}
+            ready={ready && !saving}
+            label={
+              saving
+                ? 'Saving your approval…'
+                : ready
+                  ? `Approve ${money(total)}`
+                  : day === null
+                    ? 'Step 2: pick a day to continue'
+                    : 'Step 3: sign to continue'
+            }
+            onClick={approve}
           />
           <LinkButton onClick={() => go('report')}>Back to report</LinkButton>
         </main>
@@ -161,26 +218,40 @@ export default function CheckupReport({ report }: { report: ReportView }) {
 
       {screen === 'done' && (
         <main className="mx-auto flex max-w-xl flex-col gap-3.5 px-4 py-6">
-          <DoneCard
-            line={`We will text you to confirm ${day ? `${day.long} ${slotName}` : ''}. A copy of your approval is on its way by email.`}
+          {approved ? (
+            <DoneCard
+              line={`Approved on ${new Date(approved.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. We will text you to confirm ${String(approved.details.dayLabel ?? '')} ${visitSlots.find((s) => s.id === approved.details.slot)?.short ?? ''}.`}
+            />
+          ) : (
+            <DoneCard
+              line={`We will text you to confirm ${day ? `${day.long} ${slotName}` : ''}. A copy of your approval is on its way by email.`}
+            />
+          )}
+          <LineItems
+            lines={
+              approved
+                ? ((approved.details.items as { title: string; price: number }[]) ?? []).map((i) => ({ label: i.title, amount: i.price }))
+                : cart.map((c) => ({ label: c.title, amount: c.price ?? 0 }))
+            }
           />
-          <LineItems lines={cart.map((c) => ({ label: c.title, amount: c.price ?? 0 }))} />
           <div className="text-center text-sm leading-[1.45] text-muted">
             We&apos;ll remind you about the items you saved for later. Questions? Call {company.phone}.
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setAdded(startCart(report.items))
-              setRemind({})
-              setDay(null)
-              setSlot(visitSlots[0].id)
-              go('report')
-            }}
-            className="h-11 rounded-[10px] border border-edge bg-white text-[15px] font-semibold text-navy"
-          >
-            Start the demo over
-          </button>
+          {!token && (
+            <button
+              type="button"
+              onClick={() => {
+                setAdded(startCart(report.items))
+                setRemind({})
+                setDay(null)
+                setSlot(visitSlots[0].id)
+                go('report')
+              }}
+              className="h-11 rounded-[10px] border border-edge bg-white text-[15px] font-semibold text-navy"
+            >
+              Start the demo over
+            </button>
+          )}
         </main>
       )}
     </>

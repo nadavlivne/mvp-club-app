@@ -23,13 +23,16 @@ import {
   type VisitWork,
 } from '@/lib/tech'
 import type { GuideRow, PriceBookRow } from '@/lib/types'
-import { useVisitWork } from '@/lib/useVisitWork'
+import { PhotoStoreContext, storageUploader } from '@/lib/photos'
+import { useVisitWork, type SaveStatus } from '@/lib/useVisitWork'
+import { sendToCustomer } from '@/app/tech/actions'
 import { buildEstimate, buildReport } from '@/lib/views'
 import CheckupReport from '../CheckupReport'
 import ServiceEstimate from '../ServiceEstimate'
 import { Card, Logo } from '../ui'
 import EstimateBuilder from './EstimateBuilder'
-import PhotoButton from './PhotoButton'
+import PhotoButton, { Thumb } from './PhotoButton'
+import SendControls, { type SendState } from './SendControls'
 
 type Section = 'home' | 'send' | string // trade key for checklist sections
 
@@ -40,18 +43,50 @@ export default function VisitApp({
   techName,
   guide,
   book,
+  db = false,
+  initialWork = null,
 }: {
   visit: Visit
   techName: string
   guide: GuideRow[]
   book: PriceBookRow[]
+  db?: boolean // signed in: work saved to the database, photos to storage
+  initialWork?: VisitWork | null
 }) {
   const catalog = useMemo(
     () => ({ guide: new Map(guide.map((g) => [g.id, g])), book: new Map(book.map((b) => [b.code, b])) }),
     [guide, book],
   )
   const areas = useMemo(() => checklistAreas(guide), [guide])
-  const { work, update, reset, saveError } = useVisitWork(visit)
+  const { work, update, reset, status } = useVisitWork(visit, db, initialWork)
+  const photoStore = useMemo(() => (db ? storageUploader(visit.id) : async (d: string) => d), [db, visit.id])
+
+  // Sending creates the customer's private link on the server (prices re-checked there).
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
+  const send: SendState = {
+    db,
+    busy: sending || status === 'saving',
+    error: sendError,
+    onSend: async () => {
+      const now = new Date().toISOString()
+      if (!db) {
+        update((w) => ({ ...w, sentAt: now }))
+        return
+      }
+      setSending(true)
+      setSendError(null)
+      try {
+        const r = await sendToCustomer(visit.id)
+        if ('error' in r) setSendError(r.error)
+        else update((w) => ({ ...w, sentAt: now, linkPath: r.path }))
+      } catch {
+        setSendError('No connection — try again in a moment.')
+      } finally {
+        setSending(false)
+      }
+    },
+  }
   const [section, setSection] = useState<Section>('home')
   const [preview, setPreview] = useState(false)
   const checkup = visit.kind === 'checkup'
@@ -118,14 +153,17 @@ export default function VisitApp({
   ]
 
   return (
-    <>
+    <PhotoStoreContext.Provider value={photoStore}>
       <header className="bg-navy text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 pt-[18px] pb-4">
           <div className="flex items-center justify-between gap-3">
             <Logo tagline="TECH" />
-            <Link href="/tech" className="flex h-11 items-center text-sm font-semibold text-sub">
-              ← Today&apos;s visits
-            </Link>
+            <div className="flex items-center gap-4">
+              <SaveBadge status={status} />
+              <Link href="/tech" className="flex h-11 items-center text-sm font-semibold text-sub">
+                ← Today&apos;s visits
+              </Link>
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <h1 className="font-display text-[28px] leading-[1.05] font-bold">{visit.customer.name}</h1>
@@ -164,9 +202,11 @@ export default function VisitApp({
         </nav>
 
         <main className="flex min-w-0 grow flex-col gap-3.5">
-          {saveError && (
+          {status === 'error' && (
             <Card className="border border-alert text-sm text-alert">
-              This device is out of room to keep photos. Remove a photo or two; saving to the office comes with the database step.
+              {db
+                ? 'Your last changes are not saved — check the internet connection. The app keeps trying with every change.'
+                : 'This device is out of room to keep photos. Remove a photo or two.'}
             </Card>
           )}
           {section === 'home' && <HomeProfile visit={visit} work={work} update={update} />}
@@ -196,6 +236,7 @@ export default function VisitApp({
                   window.scrollTo(0, 0)
                 }}
                 onGoTo={go}
+                send={send}
               />
             ) : (
               <EstimateBuilder
@@ -209,12 +250,18 @@ export default function VisitApp({
                   window.scrollTo(0, 0)
                 }}
                 onGoTo={(t) => go('send', t)}
+                send={send}
               />
             ))}
         </main>
       </div>
-    </>
+    </PhotoStoreContext.Provider>
   )
+}
+
+function SaveBadge({ status }: { status: SaveStatus }) {
+  const text = { saved: '✓ Saved', saving: 'Saving…', error: '⚠ Not saved', device: 'Saved on this tablet' }[status]
+  return <span className={`text-sm font-semibold ${status === 'error' ? 'text-[#FFB4A8]' : 'text-sub'}`}>{text}</span>
 }
 
 type Update = (fn: (w: VisitWork) => VisitWork) => void
@@ -528,8 +575,7 @@ function QuoteRequests({ trade, work, update }: { trade: string; work: VisitWork
       {mine.map((q) => (
         <div key={q.id} className="flex items-center gap-3 rounded-[10px] border border-line px-3 py-2">
           {q.photo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={q.photo} alt="" className="size-12 rounded-lg object-cover" />
+            <Thumb src={q.photo} className="size-12" />
           )}
           <span className="grow text-sm">{q.description}</span>
           <button
@@ -582,6 +628,7 @@ function SendPanel({
   book,
   onPreview,
   onGoTo,
+  send,
 }: {
   visit: Visit
   work: VisitWork
@@ -592,6 +639,7 @@ function SendPanel({
   book: Map<string, PriceBookRow>
   onPreview: () => void
   onGoTo: (s: Section, target?: string) => void
+  send: SendState
 }) {
   const blockers = sendBlockers(work, areas, guide, tradeLabel)
   const ids = selectedFindings(work)
@@ -647,21 +695,8 @@ function SendPanel({
         <button type="button" onClick={onPreview} className="h-[52px] rounded-xl border-2 border-navy bg-white text-[17px] font-bold text-navy">
           Preview customer report
         </button>
-        <button
-          type="button"
-          disabled={blockers.length > 0}
-          onClick={() => update((w) => ({ ...w, sentAt: new Date().toISOString() }))}
-          className={`h-[52px] rounded-xl text-[17px] font-bold ${blockers.length ? 'bg-line text-muted' : 'bg-approve text-white'}`}
-        >
-          Close check-up &amp; send report
-        </button>
+        <SendControls label="Close check-up & send report" blocked={blockers.length > 0} send={send} work={work} />
       </div>
-      {work.sentAt && (
-        <Card className="text-sm text-body">
-          Check-up closed at {new Date(work.sentAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}. Texting the customer
-          their link comes with the database step — for now nothing is sent.
-        </Card>
-      )}
       <button
         type="button"
         onClick={() => {

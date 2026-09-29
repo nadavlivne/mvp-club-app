@@ -36,6 +36,7 @@ export type VisitWork = {
   // Service calls: the estimate the tech builds from the price book.
   estimate?: EstimateWork
   sentAt?: string
+  linkPath?: string // the customer's private link, once sent
 }
 
 export type EstimateOptionWork = {

@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-// Finger / mouse signature box. Reports whether something has been drawn.
-export default function SignaturePad({ onChange }: { onChange: (signed: boolean) => void }) {
+// Finger / mouse signature box. Hands back the signature as a PNG image (or null when cleared).
+export default function SignaturePad({ onChange }: { onChange: (signature: string | null) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawing = useRef(false)
   const last = useRef<{ x: number; y: number } | null>(null)
   const [hasInk, setHasInk] = useState(false)
+  const ink = useRef(false) // same as hasInk, but readable right away inside the pointer handlers
 
   useEffect(() => {
     const canvas = canvasRef.current!
@@ -42,13 +43,14 @@ export default function SignaturePad({ onChange }: { onChange: (signed: boolean)
     ctx.lineTo(p.x, p.y)
     ctx.stroke()
     last.current = p
-    if (!hasInk) {
+    if (!ink.current) {
+      ink.current = true
       setHasInk(true)
-      onChange(true)
     }
   }
 
   const end = () => {
+    if (drawing.current && ink.current) onChange(canvasRef.current!.toDataURL('image/png'))
     drawing.current = false
     last.current = null
   }
@@ -56,8 +58,9 @@ export default function SignaturePad({ onChange }: { onChange: (signed: boolean)
   const clear = () => {
     const canvas = canvasRef.current!
     canvas.getContext('2d')!.clearRect(0, 0, canvas.width, canvas.height)
+    ink.current = false
     setHasInk(false)
-    onChange(false)
+    onChange(null)
   }
 
   return (
