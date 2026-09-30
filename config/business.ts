@@ -55,6 +55,10 @@ export const diagnosticCopy = {
   detail: 'A specialist comes out to find the cause. Any repair is priced for you before we do it.',
 }
 
+// Service-call estimates: the customer always gets this many options
+// (good / better / best, e.g. Repair, Repair + tune-up, Replace).
+export const estimateOptions = 3
+
 export const company = {
   phone: '[MVP PHONE]',
 }

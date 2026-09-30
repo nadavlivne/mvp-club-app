@@ -23,6 +23,7 @@ import {
   type VisitWork,
 } from '@/lib/tech'
 import type { GuideRow, PriceBookRow } from '@/lib/types'
+import type { ApprovalSummary } from '@/lib/approvals'
 import { PhotoStoreContext, storageUploader } from '@/lib/photos'
 import { useVisitWork, type SaveStatus } from '@/lib/useVisitWork'
 import { sendToCustomer } from '@/app/tech/actions'
@@ -45,6 +46,7 @@ export default function VisitApp({
   book,
   db = false,
   initialWork = null,
+  approval = null,
 }: {
   visit: Visit
   techName: string
@@ -52,6 +54,7 @@ export default function VisitApp({
   book: PriceBookRow[]
   db?: boolean // signed in: work saved to the database, photos to storage
   initialWork?: VisitWork | null
+  approval?: ApprovalSummary | null // what the customer approved, once they have
 }) {
   const catalog = useMemo(
     () => ({ guide: new Map(guide.map((g) => [g.id, g])), book: new Map(book.map((b) => [b.code, b])) }),
@@ -202,6 +205,21 @@ export default function VisitApp({
         </nav>
 
         <main className="flex min-w-0 grow flex-col gap-3.5">
+          {approval && (
+            <Card className="flex flex-col gap-1.5 border-2 border-success bg-success-bg">
+              <div className="text-base font-bold text-success">
+                ✓ Customer approved on{' '}
+                {new Date(approval.at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · Total $
+                {Math.round(approval.total).toLocaleString('en-US')}
+                {approval.joinedClub && ' · Joined MVP Club'}
+              </div>
+              {approval.lines.map((l) => (
+                <div key={l} className="text-sm text-body">
+                  {l}
+                </div>
+              ))}
+            </Card>
+          )}
           {status === 'error' && (
             <Card className="border border-alert text-sm text-alert">
               {db

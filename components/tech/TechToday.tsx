@@ -6,6 +6,7 @@ import { tradeInfo } from '@/config/business'
 import { loadSampleDay, signOut } from '@/app/tech/actions'
 import { checklistAreas, newWork, tradeOrder, tradeProgress, type TechDay, type Visit, type VisitWork } from '@/lib/tech'
 import type { GuideRow } from '@/lib/types'
+import type { ApprovalSummary } from '@/lib/approvals'
 import { readWork } from '@/lib/useVisitWork'
 import { Card, Logo } from '../ui'
 
@@ -13,7 +14,13 @@ const VAN_KEY = 'mvp-tech-van'
 
 type Props = { guide: GuideRow[]; dateText: string } & (
   | { mode: 'sample'; day: TechDay }
-  | { mode: 'db'; tech: { name: string; van: string }; visits: Visit[]; works: Record<string, VisitWork | null> }
+  | {
+      mode: 'db'
+      tech: { name: string; van: string }
+      visits: Visit[]
+      works: Record<string, VisitWork | null>
+      approvals: Record<string, ApprovalSummary>
+    }
 )
 
 export default function TechToday(props: Props) {
@@ -129,15 +136,18 @@ export default function TechToday(props: Props) {
             const checkup = v.kind === 'checkup'
             const done = w ? tradeOrder.filter((t) => tradeProgress(w, areas, t).complete).length : 0
             const options = w?.estimate?.options.length ?? 0
-            const status = w?.sentAt
-              ? checkup
-                ? 'Report sent'
-                : 'Estimate sent'
-              : checkup
-                ? `${done} of 3 trades done`
-                : options
-                  ? `Estimate: ${options} ${options === 1 ? 'option' : 'options'}`
-                  : 'Estimate not started'
+            const approval = props.mode === 'db' ? props.approvals[v.id] : undefined
+            const status = approval
+              ? `✓ Approved · $${Math.round(approval.total).toLocaleString('en-US')}`
+              : w?.sentAt
+                ? checkup
+                  ? 'Report sent'
+                  : 'Estimate sent'
+                : checkup
+                  ? `${done} of 3 trades done`
+                  : options
+                    ? `Estimate: ${options} ${options === 1 ? 'option' : 'options'}`
+                    : 'Estimate not started'
             return (
               <Link key={v.id} href={`/tech/visit/${v.id}`} className="block">
                 <div className="flex h-full flex-col overflow-hidden rounded-xl bg-white">
@@ -146,7 +156,9 @@ export default function TechToday(props: Props) {
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-display text-xl font-bold">{v.window}</span>
                       <span className="rounded-full bg-page px-2 py-0.5 text-xs font-bold text-muted">
-                        {checkup ? `${v.season === 'spring' ? 'Spring' : 'Fall'} check-up` : `Service call · ${tradeInfo[v.trade ?? 'HVAC'].label}`}
+                        {checkup
+                          ? `${v.season === 'spring' ? 'Spring' : 'Fall'} check-up`
+                          : `Service call · ${tradeInfo[v.trade ?? 'HVAC'].label}`}
                       </span>
                     </div>
                     <div className="text-base font-bold">{v.customer.name}</div>
@@ -156,7 +168,11 @@ export default function TechToday(props: Props) {
                       <span className={v.customer.isMember ? 'font-semibold text-success' : 'text-muted'}>
                         {v.customer.isMember ? 'Member' : 'Not a member'}
                       </span>
-                      <span className={`font-semibold ${w?.sentAt ? 'text-success' : 'text-muted'}`}>{status}</span>
+                      <span
+                        className={`font-semibold ${approval ? 'rounded-full bg-success-bg px-2 text-success' : w?.sentAt ? 'text-success' : 'text-muted'}`}
+                      >
+                        {status}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -165,7 +181,9 @@ export default function TechToday(props: Props) {
           })}
         </div>
         {props.mode === 'sample' && (
-          <div className="text-center text-xs text-muted">Sample day · vans, techs and customers are placeholders · work is kept on this device</div>
+          <div className="text-center text-xs text-muted">
+            Sample day · vans, techs and customers are placeholders · work is kept on this device
+          </div>
         )}
       </main>
     </>

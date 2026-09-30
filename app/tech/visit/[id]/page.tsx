@@ -5,6 +5,7 @@ import { loadCatalog, readSample } from '@/lib/data'
 import { supabaseConfigured } from '@/lib/supabase/config'
 import { userClient } from '@/lib/supabase/server'
 import { checkSetup } from '@/lib/supabase/setupCheck'
+import { approvalsFor } from '@/lib/approvals'
 import type { TechDay, VisitWork } from '@/lib/tech'
 import { fromRow, type VisitRow } from '@/lib/visits'
 
@@ -40,5 +41,6 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
     supabase.from('visit_work').select('work').eq('visit_id', id).maybeSingle<{ work: VisitWork }>(),
     supabase.from('techs').select('name').eq('id', user.id).single<{ name: string }>(),
   ])
-  return <VisitApp visit={fromRow(row)} techName={tech?.name ?? ''} db initialWork={work?.work ?? null} {...catalog} />
+  const approval = (await approvalsFor([id]))[id] ?? null
+  return <VisitApp visit={fromRow(row)} techName={tech?.name ?? ''} db initialWork={work?.work ?? null} approval={approval} {...catalog} />
 }

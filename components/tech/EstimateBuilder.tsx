@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { membership, serviceCallCode, tradeInfo } from '@/config/business'
+import { estimateOptions as MAX_OPTIONS, membership, serviceCallCode, tradeInfo } from '@/config/business'
 import { money, priceLines } from '@/lib/pricing'
 import {
   estimateBlockers,
@@ -20,7 +20,6 @@ import SendControls, { type SendState } from './SendControls'
 
 type Update = (fn: (w: VisitWork) => VisitWork) => void
 
-const MAX_OPTIONS = 3
 const presets = ['Repair', 'Repair + tune-up', 'Replace']
 const inputCls = 'h-11 rounded-[10px] border border-edge bg-white px-3 text-[15px] text-navy'
 const memberText = (r: PriceBookRow) => (r.memberPrice === 0 ? 'free for members' : `members ${money(r.memberPrice)}`)
@@ -118,7 +117,7 @@ export default function EstimateBuilder({
       <Card id="est-add" className={`flex scroll-mt-4 flex-wrap items-center gap-2 ${lit('est-add')}`}>
         {est.options.length < MAX_OPTIONS ? (
           <>
-            <span className="text-[15px] font-semibold">Add an option:</span>
+            <span className="text-[15px] font-semibold">Add option {est.options.length + 1} of {MAX_OPTIONS}:</span>
             {[...presets, 'Other'].map((name) => (
               <button
                 key={name}
@@ -139,7 +138,7 @@ export default function EstimateBuilder({
             ))}
           </>
         ) : (
-          <span className="text-sm text-muted">Up to {MAX_OPTIONS} options — more choices make it harder for the customer to decide.</span>
+          <span className="text-sm text-muted">✓ All {MAX_OPTIONS} options added.</span>
         )}
       </Card>
 

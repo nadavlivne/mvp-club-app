@@ -5,6 +5,7 @@ import { loadCatalog, readSample } from '@/lib/data'
 import { supabaseConfigured, todayET } from '@/lib/supabase/config'
 import { userClient } from '@/lib/supabase/server'
 import { checkSetup } from '@/lib/supabase/setupCheck'
+import { approvalsFor } from '@/lib/approvals'
 import type { TechDay, VisitWork } from '@/lib/tech'
 import { byStartTime, fromRow, type VisitRow } from '@/lib/visits'
 
@@ -49,8 +50,9 @@ export default async function TechPage() {
         .returns<{ visit_id: string; work: VisitWork }[]>()
     : { data: [] }
   const works = Object.fromEntries((workRows ?? []).map((r) => [r.visit_id, r.work]))
+  const approvals = await approvalsFor(visits.map((v) => v.id))
 
   return (
-    <TechToday mode="db" tech={tech ?? { name: user.email ?? '', van: '' }} visits={visits} works={works} guide={guide} dateText={dateText} />
+    <TechToday mode="db" tech={tech ?? { name: user.email ?? '', van: '' }} visits={visits} works={works} approvals={approvals} guide={guide} dateText={dateText} />
   )
 }

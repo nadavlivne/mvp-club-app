@@ -1,6 +1,6 @@
 // Tech app: the visit data, the work a tech records on site, and the rules
 // that decide when a check-up can be sent. Pure functions (no browser, no server).
-import type { Rating } from '@/config/business'
+import { estimateOptions, type Rating } from '@/config/business'
 import type { Customer, GuideRow } from './types'
 import type { CheckupInput, EstimateInput } from './views'
 
@@ -153,10 +153,13 @@ export function optionWhat(o: EstimateOptionWork, taskOf: (code: string) => stri
 
 // Why the estimate can't be sent yet (empty = ready). `target` is the element to scroll to.
 export function estimateBlockers(e: EstimateWork | undefined): { text: string; target: string }[] {
-  if (!e) return [{ text: 'Write what you found and add at least one option', target: 'est-found' }]
+  if (!e) return [{ text: `Write what you found and add ${estimateOptions} options`, target: 'est-found' }]
   const out: { text: string; target: string }[] = []
   if (!e.found.title.trim()) out.push({ text: 'Write what you found (the headline the customer sees)', target: 'est-found' })
-  if (e.options.length === 0) out.push({ text: 'Add at least one option', target: 'est-add' })
+  if (e.options.length < estimateOptions) {
+    const missing = estimateOptions - e.options.length
+    out.push({ text: `Add ${missing} more ${missing === 1 ? 'option' : 'options'} — the customer always gets ${estimateOptions} to choose from`, target: 'est-add' })
+  }
   e.options.forEach((o, i) => {
     const label = o.name.trim() || `Option ${i + 1}`
     if (!o.name.trim()) out.push({ text: `Option ${i + 1} needs a name`, target: `est-${o.key}` })
