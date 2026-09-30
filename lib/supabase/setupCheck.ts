@@ -16,8 +16,10 @@ export function explain(error: DbError, usingSecretKey: boolean): string {
   if (code === '42501') return 'The database setup did not finish. Run the setup text again in Supabase → SQL Editor.'
   if (/fetch failed|ENOTFOUND|ECONNREFUSED/i.test(msg))
     return 'The app cannot reach Supabase. Check NEXT_PUBLIC_SUPABASE_URL in Vercel (it looks like https://abcd.supabase.co).'
+  if (/invalid api key|no api key/i.test(msg) && usingSecretKey)
+    return 'Supabase did not accept the secret key (SUPABASE_SECRET_KEY). In Supabase → Project Settings → API Keys, copy the Secret key with the copy icon (not by selecting the text — that copies the hidden dots), paste it into Vercel, then redeploy.'
   if (/invalid api key|no api key/i.test(msg))
-    return 'Supabase did not accept a key. Re-paste the keys from Supabase → Project Settings → API Keys into Vercel, then redeploy.'
+    return 'Supabase did not accept the publishable key. Re-paste NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY from Supabase → Project Settings → API Keys into Vercel, then redeploy.'
   return `Database error: ${msg || code || 'unknown'}`
 }
 
