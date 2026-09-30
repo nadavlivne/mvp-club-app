@@ -30,6 +30,9 @@ links and approvals.
 3. Add a tech: Authentication → Users → Add user (email + password, auto-confirm). A `techs` row is
    created automatically; set `name` and `van` in Table Editor → techs.
 4. Until the Housecall Pro sync (phase 3), a signed-in tech can press "Load sample visits for today".
+5. Office area (`/office`): run `supabase/migrations/20260930000000_office.sql` (safe to re-run), then add
+   staff rows: `insert into public.staff (id, role, name) select id, 'admin', 'Nadav' from auth.users where email = '…';`
+   Roles: `admin` sees everything; `office` sees approved jobs and scheduling, no revenue or bonus totals.
 
 Local development: `npx supabase start` (Docker), then put the local URL and keys in `.env.local`.
 

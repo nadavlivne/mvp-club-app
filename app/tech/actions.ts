@@ -18,7 +18,9 @@ export async function signIn(_: unknown, form: FormData): Promise<{ error: strin
   const { error } = await supabase.auth.signInWithPassword({ email, password: String(form.get('password') ?? '') })
   // Hand the email back so the tech only retypes the password.
   if (error) return { error: 'Wrong email or password.', email }
-  redirect('/tech')
+  // Office staff land in the office, techs on today's visits.
+  const { data: staff } = await supabase.from('staff').select('role').maybeSingle()
+  redirect(staff ? '/office' : '/tech')
 }
 
 export async function signOut() {

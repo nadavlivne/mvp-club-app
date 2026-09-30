@@ -20,6 +20,7 @@ type Props = { guide: GuideRow[]; dateText: string } & (
       visits: Visit[]
       works: Record<string, VisitWork | null>
       approvals: Record<string, ApprovalSummary>
+      isStaff?: boolean
     }
 )
 
@@ -69,11 +70,18 @@ export default function TechToday(props: Props) {
           <div className="flex items-center justify-between gap-3">
             <Logo tagline="TECH" />
             {props.mode === 'db' && (
-              <form action={signOut}>
-                <button type="submit" className="flex h-11 items-center text-sm font-semibold text-sub">
-                  Sign out
-                </button>
-              </form>
+              <div className="flex items-center gap-4">
+                {props.isStaff && (
+                  <Link href="/office" className="flex h-11 items-center text-sm font-semibold text-sub">
+                    Office →
+                  </Link>
+                )}
+                <form action={signOut}>
+                  <button type="submit" className="flex h-11 items-center text-sm font-semibold text-sub">
+                    Sign out
+                  </button>
+                </form>
+              </div>
             )}
           </div>
           <div className="flex flex-col gap-1">

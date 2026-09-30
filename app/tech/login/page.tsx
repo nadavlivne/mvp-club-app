@@ -12,7 +12,7 @@ export default function LoginPage() {
     <>
       <header className="bg-navy text-white">
         <div className="mx-auto flex max-w-md flex-col gap-3 px-5 pt-[18px] pb-4">
-          <Logo tagline="TECH" />
+          <Logo tagline="TEAM" />
           <h1 className="font-display text-[28px] leading-[1.05] font-bold">Sign in</h1>
         </div>
       </header>
