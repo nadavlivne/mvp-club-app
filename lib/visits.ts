@@ -44,3 +44,14 @@ export const toRow = (v: Visit, techId: string, date: string) => ({
   home_year: v.homeYear || null,
   equipment: v.equipment,
 })
+
+// Morning first: "8:00–10:00" before "1:30–3:30" (hours before 7 are afternoon).
+export function byStartTime(a: { window: string }, b: { window: string }) {
+  const start = (w: string) => {
+    const m = /^(\d{1,2}):(\d{2})/.exec(w)
+    if (!m) return 99 * 60
+    const h = Number(m[1])
+    return (h < 7 ? h + 12 : h) * 60 + Number(m[2])
+  }
+  return start(a.window) - start(b.window)
+}

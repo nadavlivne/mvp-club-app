@@ -18,9 +18,13 @@ export async function proxy(request: NextRequest) {
       },
     },
   })
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    user = (await supabase.auth.getUser()).data.user
+  } catch {
+    // Supabase unreachable or misconfigured: let the page show what to fix.
+    return response
+  }
 
   const onLogin = request.nextUrl.pathname === '/tech/login'
   if (!user && !onLogin) {

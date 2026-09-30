@@ -39,6 +39,7 @@ export default function TechToday(props: Props) {
   }
 
   const [loading, startLoading] = useTransition()
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   let visits: Visit[]
   let who: string
@@ -106,11 +107,18 @@ export default function TechToday(props: Props) {
                 <button
                   type="button"
                   disabled={loading}
-                  onClick={() => startLoading(() => loadSampleDay())}
+                  onClick={() =>
+                    startLoading(async () => {
+                      setLoadError(null)
+                      const r = await loadSampleDay()
+                      if (r?.error) setLoadError(r.error)
+                    })
+                  }
                   className="h-11 rounded-[10px] bg-navy px-4 text-[15px] font-bold text-white"
                 >
                   {loading ? 'Loading…' : 'Load sample visits for today'}
                 </button>
+                {loadError && <span className="text-sm font-semibold text-alert">{loadError}</span>}
               </>
             )}
           </Card>

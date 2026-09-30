@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation'
+import SetupProblem from '@/components/tech/SetupProblem'
 import TechToday from '@/components/tech/TechToday'
 import { loadCatalog, readSample } from '@/lib/data'
 import { supabaseConfigured, todayET } from '@/lib/supabase/config'
 import { userClient } from '@/lib/supabase/server'
+import { checkSetup } from '@/lib/supabase/setupCheck'
 import type { TechDay, VisitWork } from '@/lib/tech'
-import { fromRow, type VisitRow } from '@/lib/visits'
+import { byStartTime, fromRow, type VisitRow } from '@/lib/visits'
 
 export const metadata = { title: "Today's visits · MVP Tech" }
 
@@ -26,12 +28,16 @@ export default async function TechPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/tech/login')
 
+  // Tables created and keys accepted? Otherwise explain what to fix instead of crashing.
+  const problems = await checkSetup(supabase, user.id, user.email ?? '')
+  if (problems.length) return <SetupProblem problems={problems} />
+
   // Row Level Security returns only this tech's own visits.
   const [{ data: tech }, { data: rows }] = await Promise.all([
     supabase.from('techs').select('name, van').eq('id', user.id).single<{ name: string; van: string }>(),
-    supabase.from('visits').select('*').eq('visit_date', todayET()).order('time_window').returns<VisitRow[]>(),
+    supabase.from('visits').select('*').eq('visit_date', todayET()).returns<VisitRow[]>(),
   ])
-  const visits = (rows ?? []).map(fromRow)
+  const visits = (rows ?? []).map(fromRow).sort(byStartTime)
   const { data: workRows } = visits.length
     ? await supabase
         .from('visit_work')

@@ -7,6 +7,7 @@ import { tradeInfo } from '@/config/business'
 import { loadCatalog, readSample } from '@/lib/data'
 import { todayET } from '@/lib/supabase/config'
 import { adminClient, userClient } from '@/lib/supabase/server'
+import { checkSetup, explain } from '@/lib/supabase/setupCheck'
 import { checklistAreas, estimateBlockers, sendBlockers, toCheckupInput, toEstimateInput, type TechDay, type VisitWork } from '@/lib/tech'
 import { fromRow, toRow, type VisitRow } from '@/lib/visits'
 import { buildEstimate, buildReport } from '@/lib/views'
@@ -28,17 +29,19 @@ export async function signOut() {
 
 // Testing only, until Housecall Pro fills the schedule: gives the signed-in tech
 // today's sample visits.
-export async function loadSampleDay() {
+export async function loadSampleDay(): Promise<{ error: string } | undefined> {
   const supabase = await userClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect('/tech/login')
+  const problems = await checkSetup(supabase, user.id, user.email ?? '')
+  if (problems.length) return { error: problems[0] }
   const day = readSample<TechDay>('tech-day.json')
   const picks = ['v101', 'v102', 'v103', 'v202']
   const rows = day.visits.filter((v) => picks.includes(v.id)).map((v) => toRow(v, user.id, todayET()))
   const { error } = await adminClient().from('visits').insert(rows)
-  if (error) throw new Error(error.message)
+  if (error) return { error: explain(error, true) }
   revalidatePath('/tech')
 }
 

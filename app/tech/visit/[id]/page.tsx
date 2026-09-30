@@ -1,8 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
+import SetupProblem from '@/components/tech/SetupProblem'
 import VisitApp from '@/components/tech/VisitApp'
 import { loadCatalog, readSample } from '@/lib/data'
 import { supabaseConfigured } from '@/lib/supabase/config'
 import { userClient } from '@/lib/supabase/server'
+import { checkSetup } from '@/lib/supabase/setupCheck'
 import type { TechDay, VisitWork } from '@/lib/tech'
 import { fromRow, type VisitRow } from '@/lib/visits'
 
@@ -27,6 +29,9 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect('/tech/login')
+
+  const problems = await checkSetup(supabase, user.id, user.email ?? '')
+  if (problems.length) return <SetupProblem problems={problems} />
 
   // Row Level Security: a tech can only open their own visits.
   const { data: row } = await supabase.from('visits').select('*').eq('id', id).maybeSingle<VisitRow>()
