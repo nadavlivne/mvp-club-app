@@ -26,7 +26,15 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  const onLogin = request.nextUrl.pathname === '/tech/login'
+  const path = request.nextUrl.pathname
+  const onLogin = path === '/tech/login'
+  // Signed in with a temporary password: choose your own first.
+  if (user?.user_metadata?.must_change_password && path !== '/tech/set-password') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/tech/set-password'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
   if (!user && !onLogin) {
     const url = request.nextUrl.clone()
     url.pathname = '/tech/login'

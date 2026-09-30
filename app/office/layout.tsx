@@ -10,7 +10,7 @@ export default async function OfficeLayout({ children }: { children: React.React
   const staff = await currentStaff()
   const nav = [
     { href: '/office', label: 'Approved jobs', ready: true, admin: false },
-    { href: '#', label: 'Techs', ready: false, admin: true },
+    { href: '/office/team', label: 'Team', ready: true, admin: true },
     { href: '#', label: 'Price list', ready: false, admin: true },
     { href: '#', label: 'Bonuses', ready: false, admin: true },
   ]

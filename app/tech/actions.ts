@@ -18,9 +18,29 @@ export async function signIn(_: unknown, form: FormData): Promise<{ error: strin
   const { error } = await supabase.auth.signInWithPassword({ email, password: String(form.get('password') ?? '') })
   // Hand the email back so the tech only retypes the password.
   if (error) return { error: 'Wrong email or password.', email }
-  // Office staff land in the office, techs on today's visits.
+  await goHome()
+}
+
+// Office staff land in the office, techs on today's visits; first sign-in picks a password.
+async function goHome(): Promise<never> {
+  const supabase = await userClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user?.user_metadata?.must_change_password) redirect('/tech/set-password')
   const { data: staff } = await supabase.from('staff').select('role').maybeSingle()
   redirect(staff ? '/office' : '/tech')
+}
+
+export async function setOwnPassword(_: unknown, form: FormData): Promise<{ error: string } | undefined> {
+  const password = String(form.get('password') ?? '')
+  if (password.length < 8) return { error: 'At least 8 characters, please.' }
+  if (password !== String(form.get('again') ?? '')) return { error: "The two passwords don't match." }
+  if (/^mvp-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(password)) return { error: 'Please choose a new password, not the temporary one.' }
+  const supabase = await userClient()
+  const { error } = await supabase.auth.updateUser({ password, data: { must_change_password: false } })
+  if (error) return { error: /different from the old/i.test(error.message) ? 'Please choose a new password, not the temporary one.' : error.message }
+  await goHome()
 }
 
 export async function signOut() {
