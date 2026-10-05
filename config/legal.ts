@@ -17,4 +17,7 @@ export const legal = {
   // Website sign-up ("Join the club"): shown above the signature and saved with the lead.
   joinTerms: (price: string, firstTermMonths: number) =>
     `I'm joining MVP Club at ${price}. The first term is ${firstTermMonths} months, then month to month. MVP Club will contact me to schedule my first check-up and to set up payment securely — no charge is made on this website. [Attorney to confirm wording]`,
+
+  // Website footer.
+  notInsurance: 'MVP Club is a home-service membership, not insurance and not a home warranty. [Attorney to confirm wording]',
 }

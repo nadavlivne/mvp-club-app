@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { legal } from '@/config/legal'
 import { site } from '@/config/site'
 
 export function SiteLogo() {
@@ -85,6 +86,7 @@ export function SiteFooter() {
           ))}
         </nav>
       </div>
+      <p className="mx-auto max-w-5xl px-4 pb-3 text-xs text-sub">{legal.notInsurance}</p>
       <div className="mx-auto flex max-w-5xl justify-between px-4 pb-8 text-xs text-sub">
         <span>
           © {new Date().getFullYear()} {site.legalName}
