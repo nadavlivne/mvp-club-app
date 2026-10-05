@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Card } from '@/components/ui'
-import type { PriceChanges, SyncStatus } from '@/lib/priceBook'
+import type { PriceChanges, SheetTabs, SyncStatus } from '@/lib/priceBook'
 import type { PriceBookRow } from '@/lib/types'
 import { linkSheet, previewUpload, publishUpload, syncNow } from './actions'
 
@@ -52,11 +52,13 @@ function Changes({ c }: { c: PriceChanges }) {
 
 export default function PricesClient({
   sheetUrl,
+  tabs,
   lastSync,
   source,
   count,
 }: {
   sheetUrl: string | null
+  tabs: SheetTabs | null
   lastSync: SyncStatus | null
   source: 'database' | 'file'
   count: number
@@ -66,17 +68,23 @@ export default function PricesClient({
   const [preview, setPreview] = useState<{ changes: PriceChanges; rows: PriceBookRow[]; fileName: string } | null>(null)
   const [uploadErrors, setUploadErrors] = useState<string[]>([])
   const [pending, start] = useTransition()
+  const linked = !!sheetUrl || (!!tabs && Object.values(tabs).some(Boolean))
 
   return (
     <>
       <Card className="flex flex-col gap-3">
         <div className="text-base font-bold">Google Sheet (the master price list)</div>
         <div className="text-sm text-body">
-          {sheetUrl
-            ? 'The app reads this sheet about every 10 minutes and publishes changes after checking them. Trades can be given view access to the same sheet.'
-            : 'Link a Google Sheet and the app keeps itself up to date from it. Steps below.'}{' '}
+          {linked
+            ? 'The app reads the sheet about every 10 minutes and publishes changes after checking them. Trades can be given view access to the same sheet.'
+            : 'Link your Google Sheet and the app keeps itself up to date from it. Steps below.'}{' '}
           Prices in use now: <b>{count} items</b>, from {source === 'database' ? 'the published list' : 'the starter file that came with the app'}.
         </div>
+        {sheetUrl && !tabs && (
+          <div className="rounded-[10px] bg-[#FFF1CC] px-3 py-2 text-sm text-[#6B4700]">
+            Linked now as a single tab. To split it into Electrical / HVAC / Plumbing tabs, follow the steps below and paste the three tab links.
+          </div>
+        )}
         <form
           action={(form) =>
             start(async () => {
@@ -86,54 +94,73 @@ export default function PricesClient({
               else setStatus(r)
             })
           }
-          className="flex flex-wrap gap-2"
+          className="flex flex-col gap-2"
         >
-          <input name="url" defaultValue={sheetUrl ?? ''} placeholder="https://docs.google.com/spreadsheets/d/…" className={`${field} min-w-0 grow`} />
-          <button type="submit" disabled={pending} className="h-11 rounded-[10px] bg-navy px-4 text-[15px] font-bold text-white">
-            {pending ? 'Checking…' : sheetUrl ? 'Save link' : 'Link sheet'}
-          </button>
-          {sheetUrl && (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => start(async () => setStatus(await syncNow()))}
-              className="h-11 rounded-[10px] border border-navy px-4 text-[15px] font-bold text-navy"
-            >
-              Sync now
+          {(['Electrical', 'HVAC', 'Plumbing'] as const).map((t) => (
+            <label key={t} className="flex flex-col gap-1 text-xs font-semibold text-muted sm:flex-row sm:items-center sm:gap-3">
+              <span className="w-28 shrink-0 text-sm text-navy">{t} tab</span>
+              <input
+                name={`tab_${t}`}
+                defaultValue={tabs?.[t] ?? ''}
+                placeholder="https://docs.google.com/spreadsheets/d/…/edit#gid=…"
+                className={`${field} min-w-0 grow`}
+              />
+            </label>
+          ))}
+          <div className="flex flex-wrap gap-2">
+            <button type="submit" disabled={pending} className="h-11 rounded-[10px] bg-navy px-4 text-[15px] font-bold text-white">
+              {pending ? 'Checking…' : 'Save tab links'}
             </button>
-          )}
+            {linked && (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => start(async () => setStatus(await syncNow()))}
+                className="h-11 rounded-[10px] border border-navy px-4 text-[15px] font-bold text-navy"
+              >
+                Sync now
+              </button>
+            )}
+          </div>
         </form>
         {error && <div className="text-sm font-semibold text-alert">{error}</div>}
         <Status s={status} />
-        {!sheetUrl && (
-          <ol className="list-decimal pl-5 text-sm leading-relaxed text-body">
+        <details open={!tabs} className="text-sm text-body">
+          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-navy">How to set up the sheet with one tab per trade</summary>
+          <ol className="list-decimal pl-5 leading-relaxed">
             <li>
               <a href="/office/prices/download" className="font-semibold text-link underline">
                 Download the current price list
               </a>{' '}
-              (a CSV file).
+              — an Excel file with the tabs Electrical, HVAC, Plumbing and How to.
             </li>
             <li>
-              In Google Sheets: <b>Blank spreadsheet → File → Import → Upload</b> that file → <b>Replace spreadsheet</b>. Keep the first row (the column names)
-              exactly as it is.
+              Open your Google Sheet → <b>File → Import → Upload</b> that file → <b>Replace spreadsheet</b> → Import data. (It keeps the same sheet and who
+              it’s shared with.)
             </li>
             <li>
-              <b>Share → General access → Anyone with the link → Viewer</b>. Add the people who may edit (you, the office) as Editors; give the trades
-              Viewer or Commenter.
+              If it isn’t shared yet: <b>Share → General access → Anyone with the link → Viewer</b>. Editors: you and the office. Trades: Viewer or
+              Commenter.
             </li>
-            <li>Copy the sheet’s address from the browser bar, paste it above and press Link sheet.</li>
+            <li>
+              Click the <b>Electrical</b> tab, copy the address from the browser bar, paste it in the Electrical box above. Same for <b>HVAC</b> and{' '}
+              <b>Plumbing</b> (each tab has its own address — it ends in a different gid number).
+            </li>
+            <li>
+              Press <b>Save tab links</b>. You should see ✓.
+            </li>
           </ol>
-        )}
+        </details>
       </Card>
 
       <Card className="flex flex-col gap-3">
         <div className="text-base font-bold">Or upload a file</div>
         <div className="text-sm text-body">
-          Excel (.xlsx) or CSV, same columns as the{' '}
+          Excel (.xlsx, one tab per trade) or CSV, same columns as the{' '}
           <a href="/office/prices/download" className="font-semibold text-link underline">
             downloaded list
           </a>
-          .{sheetUrl && ' Note: a linked Google Sheet will replace uploaded prices at its next sync — change the sheet instead.'}
+          .{linked && ' Note: a linked Google Sheet will replace uploaded prices at its next sync — change the sheet instead.'}
         </div>
         <form
           action={(form) =>

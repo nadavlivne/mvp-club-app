@@ -41,6 +41,7 @@ export default async function PricesPage() {
       ) : (
         <PricesClient
           sheetUrl={settings.sheetUrl}
+          tabs={settings.tabs}
           lastSync={settings.lastSync}
           source={source}
           count={rows.length}
