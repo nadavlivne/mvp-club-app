@@ -54,7 +54,7 @@ All wording is in `config/legal.ts`:
 - Tell the office (text or email) when a new lead arrives.
 - A page for each trade and for the main towns (Google searches like "furnace check-up West Chester").
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
-  - The review should cover rate-limiting the website sign-up form.
+  - The review should cover spam protection for the website sign-up form (rate limit or a captcha such as Cloudflare Turnstile). Don't use a hidden "trap" field: phone autofill fills it, and real people's leads were dropped.
 - Phase 4: weekly tech bonus, partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).
 
 ## Ideas not adopted (need Nadav's OK first)
