@@ -56,12 +56,16 @@ export default function PricesClient({
   lastSync,
   source,
   count,
+  guideSource,
+  guideCount,
 }: {
   sheetUrl: string | null
   tabs: SheetTabs | null
   lastSync: SyncStatus | null
   source: 'database' | 'file'
   count: number
+  guideSource: 'database' | 'file'
+  guideCount: number
 }) {
   const [status, setStatus] = useState<SyncStatus | null>(lastSync)
   const [error, setError] = useState<string | null>(null)
@@ -73,12 +77,13 @@ export default function PricesClient({
   return (
     <>
       <Card className="flex flex-col gap-3">
-        <div className="text-base font-bold">Google Sheet (the master price list)</div>
+        <div className="text-base font-bold">Google Sheet (the master price list and check-up list)</div>
         <div className="text-sm text-body">
           {linked
             ? 'The app reads the sheet about every 10 minutes and publishes changes after checking them. Trades can be given view access to the same sheet.'
             : 'Link your Google Sheet and the app keeps itself up to date from it. Steps below.'}{' '}
-          Prices in use now: <b>{count} items</b>, from {source === 'database' ? 'the published list' : 'the starter file that came with the app'}.
+          In use now: <b>{count} price items</b> and <b>{guideCount} check-up findings</b>, from{' '}
+          {source === 'database' ? 'the published list' : 'the starter file'} / {guideSource === 'database' ? 'the published checklist' : 'the starter file'}.
         </div>
         {sheetUrl && !tabs && (
           <div className="rounded-[10px] bg-[#FFF1CC] px-3 py-2 text-sm text-[#6B4700]">
@@ -96,9 +101,24 @@ export default function PricesClient({
           }
           className="flex flex-col gap-2"
         >
+          <div className="text-sm font-bold">Price list tabs</div>
           {(['Electrical', 'HVAC', 'Plumbing'] as const).map((t) => (
             <label key={t} className="flex flex-col gap-1 text-xs font-semibold text-muted sm:flex-row sm:items-center sm:gap-3">
-              <span className="w-28 shrink-0 text-sm text-navy">{t} tab</span>
+              <span className="w-44 shrink-0 text-sm text-navy">{t} tab</span>
+              <input
+                name={`tab_${t}`}
+                defaultValue={tabs?.[t] ?? ''}
+                placeholder="https://docs.google.com/spreadsheets/d/…/edit#gid=…"
+                className={`${field} min-w-0 grow`}
+              />
+            </label>
+          ))}
+          <div className="mt-1 text-sm font-bold">
+            Check-up tabs <span className="font-normal text-muted">(the Inspection Guide — optional until you add these tabs)</span>
+          </div>
+          {(['Check-up Electrical', 'Check-up HVAC', 'Check-up Plumbing'] as const).map((t) => (
+            <label key={t} className="flex flex-col gap-1 text-xs font-semibold text-muted sm:flex-row sm:items-center sm:gap-3">
+              <span className="w-44 shrink-0 text-sm text-navy">{t} tab</span>
               <input
                 name={`tab_${t}`}
                 defaultValue={tabs?.[t] ?? ''}
@@ -126,13 +146,13 @@ export default function PricesClient({
         {error && <div className="text-sm font-semibold text-alert">{error}</div>}
         <Status s={status} />
         <details open={!tabs} className="text-sm text-body">
-          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-navy">How to set up the sheet with one tab per trade</summary>
+          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-navy">How to set up the sheet (price and check-up tabs)</summary>
           <ol className="list-decimal pl-5 leading-relaxed">
             <li>
               <a href="/office/prices/download" className="font-semibold text-link underline">
                 Download the current price list
               </a>{' '}
-              — an Excel file with the tabs Electrical, HVAC, Plumbing and How to.
+              — an Excel file with the tabs Electrical, HVAC, Plumbing, Check-up Electrical, Check-up HVAC, Check-up Plumbing and How to.
             </li>
             <li>
               Open your Google Sheet → <b>File → Import → Upload</b> that file → <b>Replace spreadsheet</b> → Import data. (It keeps the same sheet and who
@@ -143,8 +163,8 @@ export default function PricesClient({
               Commenter.
             </li>
             <li>
-              Click the <b>Electrical</b> tab, copy the address from the browser bar, paste it in the Electrical box above. Same for <b>HVAC</b> and{' '}
-              <b>Plumbing</b> (each tab has its own address — it ends in a different gid number).
+              Click the <b>Electrical</b> tab, copy the address from the browser bar, paste it in the Electrical box above. Do the same for every tab —
+              each has its own address (it ends in a different gid number). The How to tab isn’t linked.
             </li>
             <li>
               Press <b>Save tab links</b>. You should see ✓.
