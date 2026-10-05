@@ -1,0 +1,48 @@
+{
+  "id": "demo",
+  "customer": { "isMember": true, "memberSince": "2025-10-01" },
+  "address": "123 Sample St, Cincinnati",
+  "date": "2026-09-28",
+  "techName": "Chris",
+  "season": "fall",
+  "findings": [
+    {
+      "key": "v1",
+      "guideId": "PI-11",
+      "title": "Leak under the kitchen sink",
+      "techNote": "The supply line is dripping and the cabinet floor is wet."
+    },
+    {
+      "key": "b1",
+      "guideId": "EI-01",
+      "title": "Bathroom GFCI outlet does not trip"
+    },
+    {
+      "key": "c1",
+      "guideId": "HI-11",
+      "title": "AC contactor is worn",
+      "techNote": "The contacts are pitted."
+    },
+    {
+      "key": "w1",
+      "guideId": "PI-03",
+      "title": "Water heater is 11 years old"
+    }
+  ],
+  "checkedOk": [
+    "Furnace flame and flue",
+    "Carbon monoxide",
+    "AC temperature drop",
+    "Thermostat",
+    "Water pressure",
+    "Main shut-off",
+    "All faucets and drains",
+    "Toilets",
+    "Sump pump",
+    "Panel (cover off)",
+    "Meter base and service cable",
+    "Kitchen GFCIs",
+    "Smoke and CO alarms",
+    "Filter replaced today"
+  ]
+}

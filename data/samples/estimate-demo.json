@@ -1,0 +1,36 @@
+{
+  "id": "demo",
+  "customer": { "isMember": false },
+  "address": "456 Example Ave, Cincinnati",
+  "date": "2026-09-28",
+  "techName": "Chris",
+  "trade": "HVAC",
+  "found": {
+    "title": "Your AC isn't cooling because the start capacitor failed.",
+    "detail": "The outdoor unit can't start without it. The contactor is also worn."
+  },
+  "options": [
+    {
+      "key": "o1",
+      "name": "Repair",
+      "what": "Replace capacitor and contactor",
+      "why": "Gets your AC cooling today. Parts are on the truck.",
+      "codes": ["HV-120", "HV-121"]
+    },
+    {
+      "key": "o2",
+      "name": "Repair + tune-up",
+      "what": "Capacitor, contactor and a full AC tune-up",
+      "why": "Fixes today’s problem and cleans the system so it runs better all summer. Members get the tune-up included.",
+      "codes": ["HV-120", "HV-121", "HV-110"],
+      "mostChosen": true
+    },
+    {
+      "key": "o3",
+      "name": "Replace the AC",
+      "what": "New AC condenser and coil [BRAND / MODEL]",
+      "why": "Your unit is 17 years old. Worth considering before the next repair. [WARRANTY TERMS]",
+      "codes": ["HV-200"]
+    }
+  ]
+}
