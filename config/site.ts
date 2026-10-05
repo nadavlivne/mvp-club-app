@@ -2,7 +2,8 @@
 // Change these here — the pages read them from this file.
 
 export const site = {
-  url: 'https://joinmvpclub.com',
+  // Main address (Vercel redirects joinmvpclub.com and the other domains here).
+  url: 'https://www.joinmvpclub.com',
   name: 'MVP Club',
   legalName: 'MVP Home Services LLC',
   // Temporary number until MVP Club has its own line.

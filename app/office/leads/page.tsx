@@ -80,7 +80,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         ))}
       </div>
       <div className="text-sm text-muted">
-        Sign-ups from the website ({site.url.replace('https://', '')}/join) and from the techs&apos; tablets. On the website, someone who gives their name and phone
+        Sign-ups from the website ({site.url.replace('https://www.', '')}/join) and from the techs&apos; tablets. On the website, someone who gives their name and phone
         shows up here right away, even if they stop before signing.
       </div>
 
