@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import ServiceEstimate from '@/components/ServiceEstimate'
-import { loadCatalog, readSample } from '@/lib/data'
+import { loadCatalogLive, readSample } from '@/lib/data'
 import { buildEstimate, type EstimateInput } from '@/lib/views'
 
 export const metadata = { title: 'Your estimate · MVP Home Services' }
@@ -9,6 +9,6 @@ export const metadata = { title: 'Your estimate · MVP Home Services' }
 export default async function EstimatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   if (id !== 'demo') notFound()
-  const estimate = buildEstimate(readSample<EstimateInput>('estimate-demo.json'), loadCatalog())
+  const estimate = buildEstimate(readSample<EstimateInput>('estimate-demo.json'), await loadCatalogLive())
   return <ServiceEstimate estimate={estimate} />
 }
