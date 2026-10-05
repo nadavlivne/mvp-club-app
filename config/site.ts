@@ -10,11 +10,10 @@ export const site = {
   phoneDisplay: '(513) 909-9656',
   phoneHref: '+15139099656',
   address: { street: '114 E 8th St', city: 'Cincinnati', state: 'OH', zip: '45202' },
-  // GUESS: weekdays only — confirm with Nadav.
   hours: { days: 'Monday–Friday', open: '8:00 AM', close: '5:00 PM', schema: 'Mo-Fr 08:00-17:00' },
   // Zip codes come from data/service_area.csv (miles from the office); only those within this radius are served.
-  serviceRadiusMiles: 40,
+  serviceRadiusMiles: 30,
   areaSummary: 'Greater Cincinnati, Northern Kentucky and Southeast Indiana — from Liberty Township to Florence, and from Lawrenceburg to Batavia.',
-  // Housecall Pro online booking link, when we have one. Until then the buttons call or text.
-  bookingUrl: null as string | null,
+  // Times people can pick for their first check-up (sign-up form).
+  preferredTimes: ['Weekday morning (8–12)', 'Weekday afternoon (12–5)', 'Any time'],
 }

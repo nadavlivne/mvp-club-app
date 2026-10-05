@@ -5,6 +5,12 @@ export const membership = {
   monthly: 30,
   yearly: 330,
   firstTermMonths: 12,
+  // Membership covers one heating & cooling system; each extra one adds this much.
+  extraSystemMonthly: 10,
+  // GUESS: yearly plan extra system = 12 × $10. Confirm with Nadav.
+  extraSystemYearly: 120,
+  // Most systems someone can pick on the sign-up form (more = office follows up).
+  maxSystems: 4,
   // Replacement credits only apply after this many days of membership.
   creditWaitDays: 90,
 }
@@ -61,4 +67,10 @@ export const estimateOptions = 3
 
 export const company = {
   phone: '(513) 909-9656', // temporary number (same as config/site.ts)
+}
+
+// Membership price for a plan and number of heating & cooling systems.
+export function membershipPrice(plan: 'monthly' | 'yearly', systems: number) {
+  const extra = Math.max(0, systems - 1)
+  return plan === 'monthly' ? membership.monthly + extra * membership.extraSystemMonthly : membership.yearly + extra * membership.extraSystemYearly
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import ZipCheck from '@/components/site/ZipCheck'
 import { membership, ratings, replacementCredits, serviceCallCode, type Rating } from '@/config/business'
 import { site } from '@/config/site'
@@ -52,6 +54,14 @@ const faqs: [string, string][] = [
     'Is the non-member service call credited toward the repair?',
     'No. The non-member service call is a separate charge. Members pay $19 instead — and you can join on the same visit to get the member price.',
   ],
+  [
+    'I have more than one furnace or AC. Is that covered?',
+    `The membership covers one heating & cooling system. Each extra system is +$${membership.extraSystemMonthly} a month — the sign-up form adds it for you.`,
+  ],
+  [
+    'What are replacement credits?',
+    `When a member replaces equipment with us — like a water heater, furnace or AC — they get a credit off the price. Credits start after ${membership.creditWaitDays} days of membership.`,
+  ],
   ['Do you keep my card on file?', 'We never store card numbers ourselves. Billing runs through our secure payment system.'],
   ['Where do you work?', site.areaSummary],
 ]
@@ -69,7 +79,6 @@ export default async function Home() {
   const yearSaving = membership.monthly * 12 - membership.yearly
   const tel = `tel:${site.phoneHref}`
   const sms = `sms:${site.phoneHref}`
-  const joinHref = site.bookingUrl ?? tel
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -91,27 +100,19 @@ export default async function Home() {
     description: metadata.description,
   }
 
+  // Lets Google show our answers right in the search results.
+  const faqLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+  }
+
   return (
     <div className="bg-page text-navy">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
 
-      {/* Top bar */}
-      <header className="sticky top-0 z-10 bg-navy text-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-          <a href="#top" className="flex items-center gap-2.5" aria-label="MVP Club home">
-            <span className="flex gap-[3px] -skew-x-[14deg]" aria-hidden>
-              <span className="h-6 w-1.5 bg-[#F2B705]" />
-              <span className="h-6 w-1.5 bg-[#2F8FE0]" />
-              <span className="h-6 w-1.5 bg-[#F2672A]" />
-            </span>
-            <span className="font-logo text-2xl leading-none">MVP</span>
-            <span className="font-display text-[13px] font-bold tracking-[0.2em] text-sub">CLUB</span>
-          </a>
-          <a href={tel} className="flex h-11 items-center rounded-lg bg-white/10 px-3 font-semibold ring-1 ring-white/25">
-            {site.phoneDisplay}
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main id="top">
         {/* Hero */}
@@ -126,9 +127,9 @@ export default async function Home() {
               <strong className="text-white">{memberCall} service call</strong>.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <a href={joinHref} className="flex h-14 items-center justify-center rounded-xl bg-approve px-6 text-lg font-bold text-white">
+              <Link href="/join" className="flex h-14 items-center justify-center rounded-xl bg-approve px-6 text-lg font-bold text-white">
                 Join for ${membership.monthly}/month
-              </a>
+              </Link>
               <a href={sms} className="flex h-14 items-center justify-center rounded-xl bg-white/10 px-6 text-lg font-semibold ring-1 ring-white/30">
                 Text us a question
               </a>
@@ -144,8 +145,25 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Why MVP Club */}
+        <section className="bg-white">
+          <div className="mx-auto grid max-w-5xl gap-6 px-4 py-12 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ['One call, three trades', 'Heating & cooling, plumbing and electrical — one team that knows your home.'],
+              ['Catch it early', 'Small problems found at a check-up cost far less than a breakdown on the coldest night.'],
+              ['Prices before work', 'Every repair is priced for you first. Nothing is done without your OK.'],
+              ['Reminders, not surprises', 'We keep track of what can wait and remind you before it becomes urgent.'],
+            ].map(([title, text]) => (
+              <div key={title} className="flex flex-col gap-1.5">
+                <h3 className="font-display text-xl font-bold">{title}</h3>
+                <p className="text-[15px] text-body">{text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* What every check-up covers */}
-        <section className="mx-auto max-w-5xl px-4 py-12">
+        <section id="checkup" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-12">
           <h2 className="font-display text-[32px] leading-tight font-bold">Every check-up covers all three trades</h2>
           <p className="mt-2 max-w-2xl text-body">Spring visits focus on your AC, fall visits on your furnace — and every visit checks your plumbing and electrical too.</p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
@@ -202,7 +220,7 @@ export default async function Home() {
         </section>
 
         {/* Price + member benefits */}
-        <section id="join" className="mx-auto max-w-5xl px-4 py-12">
+        <section id="membership" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-12">
           <h2 className="font-display text-[32px] leading-tight font-bold">Membership</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-xl bg-navy p-6 text-white">
@@ -219,9 +237,12 @@ export default async function Home() {
                 <li>✓ Covers one heating &amp; cooling system (+$10/month each extra)</li>
                 <li>✓ First term 12 months, then month to month</li>
               </ul>
-              <a href={joinHref} className="mt-6 flex h-14 items-center justify-center rounded-xl bg-approve text-lg font-bold text-white">
-                Join now — call {site.phoneDisplay}
-              </a>
+              <Link href="/join" className="mt-6 flex h-14 items-center justify-center rounded-xl bg-approve text-lg font-bold text-white">
+                Join MVP Club
+              </Link>
+              <Link href="/join?plan=yearly" className="mt-2 block text-center text-sm font-semibold text-sub underline">
+                Or pay yearly — ${membership.yearly}/year
+              </Link>
             </div>
             <div className="rounded-xl bg-white p-6 shadow-sm ring-1 ring-line">
               <h3 className="font-display text-xl font-bold">Member benefits</h3>
@@ -264,18 +285,41 @@ export default async function Home() {
         </section>
 
         {/* Service area */}
-        <section id="area" className="bg-white">
+        <section id="area" className="scroll-mt-20 bg-white">
           <div className="mx-auto grid max-w-5xl gap-6 px-4 py-12 md:grid-cols-2 md:items-center">
             <div>
               <h2 className="font-display text-[32px] leading-tight font-bold">Where we work</h2>
               <p className="mt-2 text-body">{site.areaSummary}</p>
+              <Link href="/service-area" className="mt-3 inline-block font-semibold text-link underline">
+                See all the towns we serve
+              </Link>
             </div>
             <ZipCheck areas={areas} phone={site.phoneDisplay} phoneHref={site.phoneHref} />
           </div>
         </section>
 
+        {/* Non-members: repair now */}
+        <section className="mx-auto max-w-5xl px-4 pt-12">
+          <div className="flex flex-col gap-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-line md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="font-display text-2xl font-bold">Something broken right now?</h2>
+              <p className="mt-1 max-w-2xl text-body">
+                We fix heating &amp; cooling, plumbing and electrical problems for everyone. Service call {regularCall} — or {memberCall} if you join the club on that visit.
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <a href={tel} className="flex h-12 items-center justify-center rounded-xl bg-navy px-5 font-bold text-white">
+                Call {site.phoneDisplay}
+              </a>
+              <a href={sms} className="flex h-12 items-center justify-center rounded-xl border-2 border-navy px-5 font-bold">
+                Text us
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* FAQ */}
-        <section className="mx-auto max-w-3xl px-4 py-12">
+        <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-12">
           <h2 className="font-display text-[32px] leading-tight font-bold">Questions</h2>
           <div className="mt-4 flex flex-col gap-2">
             {faqs.map(([q, a]) => (
@@ -289,39 +333,21 @@ export default async function Home() {
             ))}
           </div>
         </section>
+        {/* Final call to action */}
+        <section className="bg-navy text-white">
+          <div className="mx-auto flex max-w-5xl flex-col items-start gap-4 px-4 py-12 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="font-display text-[32px] leading-tight font-bold">Ready when you are</h2>
+              <p className="mt-1 text-sub">Sign up in two minutes. We&apos;ll call to schedule your first check-up.</p>
+            </div>
+            <Link href="/join" className="flex h-14 items-center justify-center rounded-xl bg-approve px-8 text-lg font-bold">
+              Join MVP Club
+            </Link>
+          </div>
+        </section>
       </main>
 
-      {/* Contact */}
-      <footer className="bg-navy text-white">
-        <div className="mx-auto grid max-w-5xl gap-6 px-4 py-10 md:grid-cols-3">
-          <div>
-            <div className="font-logo text-2xl">MVP</div>
-            <p className="mt-1 text-sm text-sub">{site.legalName}</p>
-          </div>
-          <div className="text-sm leading-6">
-            <div className="font-display text-base font-bold tracking-wide">Call or text</div>
-            <a href={tel} className="text-lg font-semibold underline">
-              {site.phoneDisplay}
-            </a>
-            <div className="text-sub">
-              {site.hours.days}, {site.hours.open}–{site.hours.close}
-            </div>
-          </div>
-          <div className="text-sm leading-6">
-            <div className="font-display text-base font-bold tracking-wide">Office</div>
-            <div>{site.address.street}</div>
-            <div>
-              {site.address.city}, {site.address.state} {site.address.zip}
-            </div>
-          </div>
-        </div>
-        <div className="mx-auto flex max-w-5xl justify-between px-4 pb-8 text-xs text-sub">
-          <span>© {new Date().getFullYear()} {site.legalName}</span>
-          <a href="/tech/login" className="underline">
-            Staff sign-in
-          </a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
