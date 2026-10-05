@@ -31,6 +31,8 @@ type Lead = {
   office_notes: string
   handled_by: string
   handled_at: string | null
+  source: string
+  techs: { name: string; van: string } | null
 }
 
 const fmt = (iso: string) =>
@@ -58,7 +60,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const tab = TABS.find((t) => t.id === show) ?? TABS[0]
 
   const since = new Date(Date.now() - 180 * 86_400_000).toISOString()
-  const { data, error } = await adminClient().from('leads').select('*').gte('created_at', since).order('created_at', { ascending: false }).returns<Lead[]>()
+  const { data, error } = await adminClient().from('leads').select('*, techs(name, van)').gte('created_at', since).order('created_at', { ascending: false }).returns<Lead[]>()
   const all = data ?? []
   const count = (t: (typeof TABS)[number]) => all.filter((l) => t.statuses.includes(l.status)).length
   // Finished sign-ups first, then people who stopped.
@@ -78,8 +80,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         ))}
       </div>
       <div className="text-sm text-muted">
-        From the website sign-up form ({site.url.replace('https://', '')}/join). Someone who gives their name and phone shows up here right away, even if they stop
-        before signing.
+        Sign-ups from the website ({site.url.replace('https://', '')}/join) and from the techs&apos; tablets. On the website, someone who gives their name and phone
+        shows up here right away, even if they stop before signing.
       </div>
 
       {error && (
@@ -115,8 +117,12 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
               </div>
 
               <div className="flex flex-wrap gap-2 text-xs font-bold">
-                {l.signed_at ? (
-                  <span className="rounded-full bg-success-bg px-2 py-0.5 text-success">Signed up ✓ — call to schedule + send payment link</span>
+                {l.source === 'tech' ? (
+                  <span className="rounded-full bg-success-bg px-2 py-0.5 text-success">
+                    Signed up on site ✓ — {l.techs ? `${l.techs.name}${l.techs.van ? ` (${l.techs.van})` : ''}` : 'tech'} · check the card was taken in Housecall Pro
+                  </span>
+                ) : l.signed_at ? (
+                  <span className="rounded-full bg-success-bg px-2 py-0.5 text-success">Signed up on the website ✓ — call to schedule + send payment link</span>
                 ) : recent(l) ? (
                   <span className="rounded-full bg-[#E3EEFB] px-2 py-0.5 text-[#174F8C]">Filling in the form now</span>
                 ) : (

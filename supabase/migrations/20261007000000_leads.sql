@@ -38,3 +38,8 @@ create index if not exists leads_created_idx on public.leads (created_at desc);
 alter table public.leads enable row level security;
 revoke all on public.leads from anon, authenticated;
 grant all on public.leads to service_role;
+
+-- Sign-ups taken on the tech's tablet during a visit (source = 'tech').
+alter table public.leads add column if not exists tech_id uuid references public.techs (id) on delete set null;
+alter table public.leads add column if not exists visit_id uuid references public.visits (id) on delete set null;
+create index if not exists leads_visit_idx on public.leads (visit_id);

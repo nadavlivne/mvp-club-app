@@ -47,6 +47,7 @@ export default function VisitApp({
   db = false,
   initialWork = null,
   approval = null,
+  memberSignup = null,
 }: {
   visit: Visit
   techName: string
@@ -55,6 +56,7 @@ export default function VisitApp({
   db?: boolean // signed in: work saved to the database, photos to storage
   initialWork?: VisitWork | null
   approval?: ApprovalSummary | null // what the customer approved, once they have
+  memberSignup?: { name: string; at: string } | null // signed up for MVP Club on this visit
 }) {
   const catalog = useMemo(
     () => ({ guide: new Map(guide.map((g) => [g.id, g])), book: new Map(book.map((b) => [b.code, b])) }),
@@ -205,6 +207,24 @@ export default function VisitApp({
         </nav>
 
         <main className="flex min-w-0 grow flex-col gap-3.5">
+          {db &&
+            !visit.customer.isMember &&
+            (memberSignup ? (
+              <Card className="flex flex-col gap-1 border-2 border-success bg-success-bg">
+                <div className="text-base font-bold text-success">✓ {memberSignup.name} signed up for MVP Club on this visit</div>
+                <div className="text-sm text-body">Make sure the card was taken in the Housecall Pro app.</div>
+              </Card>
+            ) : (
+              <Card className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col">
+                  <span className="text-base font-bold">Not a member yet</span>
+                  <span className="text-sm text-body">Members get two check-ups a year, member prices and a lower service call.</span>
+                </div>
+                <Link href={`/tech/visit/${visit.id}/join`} className="flex h-12 items-center rounded-[10px] bg-approve px-4 text-[15px] font-bold text-white">
+                  Sign up for MVP Club · 1 minute
+                </Link>
+              </Card>
+            ))}
           {approval && (
             <Card className="flex flex-col gap-1.5 border-2 border-success bg-success-bg">
               <div className="text-base font-bold text-success">
