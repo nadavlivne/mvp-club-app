@@ -1,5 +1,7 @@
 import 'server-only'
 import readXlsx from 'read-excel-file/node'
+import writeXlsx from 'write-excel-file/node'
+import { PRICE_SHEET_HOW_TO } from './priceSheetHowTo'
 import { serviceCallCode } from '@/config/business'
 import { parseCsv } from './csv'
 import { loadPriceBook } from './data'
@@ -71,11 +73,20 @@ const norm = (h: string) => h.trim().toLowerCase().replace(/[\s-]+/g, '_')
 export async function readPriceFile(fileName: string, bytes: Buffer): Promise<Record<string, string>[]> {
   if (/\.xlsx$/i.test(fileName)) {
     const sheets = await readXlsx(bytes)
-    const [header, ...body] = (sheets[0]?.data ?? []) as unknown[][] // first tab
-    const keys = (header ?? []).map((h) => norm(String(h ?? '')))
-    return body
-      .filter((r) => r.some((c) => c !== null && String(c).trim() !== ''))
-      .map((r) => Object.fromEntries(keys.map((k, i) => [k, r[i] === null || r[i] === undefined ? '' : String(r[i]).trim()])))
+    // One tab per trade (Electrical / HVAC / Plumbing) if the file has them, otherwise the first tab.
+    const tradeTabs = sheets.filter((s) => (TRADE_TABS as readonly string[]).includes(s.sheet))
+    const use = tradeTabs.length ? tradeTabs : sheets.slice(0, 1)
+    return use.flatMap((sheet) => {
+      const [header, ...body] = (sheet.data ?? []) as unknown[][]
+      const keys = (header ?? []).map((h) => norm(String(h ?? '')))
+      return body
+        .map((r, i) => ({ r, i }))
+        .filter(({ r }) => r.some((c) => c !== null && String(c).trim() !== ''))
+        .map(({ r, i }) => ({
+          ...Object.fromEntries(keys.map((k, j) => [k, r[j] === null || r[j] === undefined ? '' : String(r[j]).trim()])),
+          ...(tradeTabs.length ? { _tab: sheet.sheet, _where: `${sheet.sheet} tab, row ${i + 2}` } : {}),
+        }))
+    })
   }
   if (/\.csv$/i.test(fileName)) {
     return parseCsv(bytes.toString('utf8').replace(/^﻿/, '')).map((r) =>
@@ -102,7 +113,8 @@ export function checkPriceRows(raw: Record<string, string>[], guide: GuideRow[])
   const rows: PriceBookRow[] = []
   const seen = new Set<string>()
   raw.forEach((r, i) => {
-    const line = `Row ${i + 2}${r.code ? ` (${r.code})` : ''}`
+    const line = `${r._where ?? `Row ${i + 2}`}${r.code ? ` (${r.code})` : ''}`
+    if (r._tab && r.trade && r.trade !== r._tab) errors.push(`${line}: trade says ${r.trade}, but the row is on the ${r._tab} tab.`)
     const code = r.code.trim().toUpperCase()
     if (!code) return errors.push(`${line}: code is empty.`)
     if (seen.has(code)) return errors.push(`${line}: code ${code} appears twice.`)
@@ -206,15 +218,21 @@ export function toCsv(rows: PriceBookRow[]): string {
 // never replaces good prices: the last good list stays and the office sees what's wrong.
 
 export type SyncStatus = { at: string; ok: boolean; message: string; errors?: string[] }
-export type PriceSettings = { sheetUrl: string | null; lastCheckedAt: string | null; lastSync: SyncStatus | null }
+// One link per trade tab (Electrical / HVAC / Plumbing), or a single link for a one-tab sheet.
+export const TRADE_TABS = ['Electrical', 'HVAC', 'Plumbing'] as const
+export type SheetTabs = Partial<Record<(typeof TRADE_TABS)[number], string>>
+export type PriceSettings = { sheetUrl: string | null; tabs: SheetTabs | null; lastCheckedAt: string | null; lastSync: SyncStatus | null }
 
 const SYNC_EVERY_MS = 10 * 60 * 1000
 
 export async function getPriceSettings(): Promise<PriceSettings> {
-  const { data, error } = await adminClient().from('app_settings').select('key, value').in('key', ['price_sheet_url', 'price_sheet_checked_at', 'price_sheet_last_sync'])
+  const { data, error } = await adminClient()
+    .from('app_settings')
+    .select('key, value')
+    .in('key', ['price_sheet_url', 'price_sheet_tabs', 'price_sheet_checked_at', 'price_sheet_last_sync'])
   if (error) throw new Error(error.message) // e.g. the price list setup file hasn't been run yet
   const get = (k: string) => data?.find((r) => r.key === k)?.value ?? null
-  return { sheetUrl: get('price_sheet_url'), lastCheckedAt: get('price_sheet_checked_at'), lastSync: get('price_sheet_last_sync') }
+  return { sheetUrl: get('price_sheet_url'), tabs: get('price_sheet_tabs'), lastCheckedAt: get('price_sheet_checked_at'), lastSync: get('price_sheet_last_sync') }
 }
 
 async function setSetting(key: string, value: unknown) {
@@ -222,6 +240,9 @@ async function setSetting(key: string, value: unknown) {
 }
 
 export const savePriceSheetUrl = (url: string | null) => setSetting('price_sheet_url', url)
+export const savePriceSheetTabs = (tabs: SheetTabs | null) => setSetting('price_sheet_tabs', tabs)
+const hasTabs = (s: PriceSettings) => !!s.tabs && TRADE_TABS.some((t) => s.tabs?.[t])
+export const sheetLinked = (s: PriceSettings) => hasTabs(s) || !!s.sheetUrl
 
 // Accepts the sheet's normal link or its "Publish to web" link; returns the CSV download address.
 export function sheetCsvUrl(link: string): string | null {
@@ -253,20 +274,41 @@ export async function syncFromSheet(by: { id: string | null; name: string }, gui
     await setSetting('price_sheet_last_sync', status)
     return status
   }
-  const csvUrl = settings.sheetUrl ? sheetCsvUrl(settings.sheetUrl) : null
-  if (!csvUrl) return done({ ok: false, message: 'No Google Sheet linked yet.' })
+  // Which tabs to read: one per trade, or the single linked sheet.
+  const sources: { tab: string | null; link: string }[] = hasTabs(settings)
+    ? TRADE_TABS.map((t) => ({ tab: t, link: settings.tabs?.[t] ?? '' }))
+    : settings.sheetUrl
+      ? [{ tab: null, link: settings.sheetUrl }]
+      : []
+  if (!sources.length) return done({ ok: false, message: 'No Google Sheet linked yet.' })
+  const missingTabs = sources.filter((x) => !x.link).map((x) => x.tab)
+  if (missingTabs.length) return done({ ok: false, message: `Missing the link for the ${missingTabs.join(' and ')} tab.` })
 
-  let text: string
-  try {
-    const res = await fetch(csvUrl, { cache: 'no-store', redirect: 'follow', signal: AbortSignal.timeout(10_000) })
-    text = await res.text()
-    if (!res.ok || /^\s*<!DOCTYPE html|<html/i.test(text))
-      return done({ ok: false, message: 'Could not read the Google Sheet. In the sheet, set Share → "Anyone with the link" → Viewer (or use File → Share → Publish to web → CSV).' })
-  } catch {
-    return done({ ok: false, message: 'Google Sheets did not answer. The app will try again shortly.' })
+  const raw: Record<string, string>[] = []
+  for (const src of sources) {
+    const csvUrl = sheetCsvUrl(src.link)
+    const name = src.tab ? `${src.tab} tab` : 'The sheet'
+    if (!csvUrl) return done({ ok: false, message: `${name}: that isn't a Google Sheets link.` })
+    let text: string
+    try {
+      const res = await fetch(csvUrl, { cache: 'no-store', redirect: 'follow', signal: AbortSignal.timeout(10_000) })
+      text = await res.text()
+      if (!res.ok || /^\s*<!DOCTYPE html|<html/i.test(text))
+        return done({ ok: false, message: `${name}: could not read it. In the sheet, set Share → "Anyone with the link" → Viewer.` })
+    } catch {
+      return done({ ok: false, message: 'Google Sheets did not answer. The app will try again shortly.' })
+    }
+    const rows = parseCsv(text.replace(/^\uFEFF/, '')).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [norm(k), v])))
+    const missingCols = PRICE_COLUMNS.filter((c) => rows.length && !(c in rows[0]))
+    if (!rows.length) return done({ ok: false, message: `${name} is empty — or the link points to the wrong tab (e.g. How to).` })
+    if (missingCols.length)
+      return done({ ok: false, message: `${name}: missing columns ${missingCols.join(', ')}. Is the link pointing to the right tab?` })
+    rows.forEach((r, i) => {
+      r._where = src.tab ? `${src.tab} tab, row ${i + 2}` : `Row ${i + 2}`
+      if (src.tab) r._tab = src.tab
+    })
+    raw.push(...rows)
   }
-
-  const raw = parseCsv(text.replace(/^﻿/, '')).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [norm(k), v])))
   const { rows, errors } = checkPriceRows(raw, guide)
   if (errors.length) return done({ ok: false, message: 'The sheet has problems, so the app is still using the last good prices.', errors })
 
@@ -282,10 +324,47 @@ export async function syncIfDue(guide: GuideRow[]) {
   if (!supabaseConfigured || !process.env.SUPABASE_SECRET_KEY) return
   try {
     const s = await getPriceSettings()
-    if (!s.sheetUrl) return
+    if (!sheetLinked(s)) return
     if (s.lastCheckedAt && Date.now() - new Date(s.lastCheckedAt).getTime() < SYNC_EVERY_MS) return
     await syncFromSheet({ id: null, name: 'Automatic sync' }, guide)
   } catch {
     // Never let a sync problem break a page; the office sees the last status.
   }
+}
+
+// The price list as an Excel file: one tab per trade, plus the How to tab.
+export async function toXlsx(rows: PriceBookRow[]): Promise<Buffer> {
+  const header = PRICE_COLUMNS.map((c) => ({ value: c as string, fontWeight: 'bold' as const }))
+  const tradeSheet = (trade: string) => ({
+    sheet: trade,
+    stickyRowsCount: 1,
+    columns: [{ width: 10 }, { width: 11 }, { width: 14 }, { width: 46 }, { width: 9 }, { width: 14 }, { width: 14 }, { width: 10 }, { width: 11 }, { width: 50 }],
+    data: [
+      header,
+      ...rows
+        .filter((r) => r.trade === trade)
+        .sort((a, b) => a.code.localeCompare(b.code))
+        .map((r) => [
+          { value: r.code },
+          { value: r.trade },
+          { value: r.category },
+          { value: r.task },
+          { value: r.estHours ?? '' },
+          { value: r.standardPrice, type: Number },
+          { value: r.memberPrice, type: Number },
+          { value: r.rateType },
+          { value: r.creditTier },
+          { value: r.notes },
+        ]),
+    ],
+  })
+  const howTo = {
+    sheet: 'How to',
+    columns: [{ width: 26 }, { width: 100 }, { width: 26 }],
+    data: PRICE_SHEET_HOW_TO.map((row, i) =>
+      row.map((v, j) => ({ value: v, fontWeight: (i === 0 || (j === 0 && v === v.toUpperCase() && v.length > 3) || i === 9 ? 'bold' : undefined) as 'bold' | undefined, wrap: j === 1 })),
+    ),
+  }
+  // Same column order Google Sheets expects; cells without a value are fine.
+  return writeXlsx([...TRADE_TABS.map(tradeSheet), howTo] as Parameters<typeof writeXlsx>[0]).toBuffer()
 }

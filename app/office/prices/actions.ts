@@ -8,8 +8,11 @@ import {
   livePriceBook,
   publishPriceBook,
   readPriceFile,
+  savePriceSheetTabs,
   savePriceSheetUrl,
   sheetCsvUrl,
+  TRADE_TABS,
+  type SheetTabs,
   syncFromSheet,
   type PriceChanges,
   type SyncStatus,
@@ -19,16 +22,24 @@ import type { PriceBookRow } from '@/lib/types'
 
 const guide = () => [...loadInspectionGuide().values()]
 
+// One link per trade tab. Copy each from the browser bar while that tab is open.
 export async function linkSheet(form: FormData): Promise<SyncStatus | { error: string }> {
   const me = await requireStaff('admin')
-  const link = String(form.get('url') ?? '').trim()
-  if (!link) {
+  const tabs: SheetTabs = Object.fromEntries(TRADE_TABS.map((t) => [t, String(form.get(`tab_${t}`) ?? '').trim()]))
+  if (TRADE_TABS.every((t) => !tabs[t])) {
+    await savePriceSheetTabs(null)
     await savePriceSheetUrl(null)
     revalidatePath('/office/prices')
     return { at: new Date().toISOString(), ok: true, message: 'Google Sheet unlinked. The current prices stay as they are.' }
   }
-  if (!sheetCsvUrl(link)) return { error: 'That doesn’t look like a Google Sheets link. Copy it from the browser address bar while the sheet is open.' }
-  await savePriceSheetUrl(link)
+  for (const t of TRADE_TABS) {
+    if (!tabs[t]) return { error: `Please paste the link for the ${t} tab too.` }
+    if (!sheetCsvUrl(tabs[t]!)) return { error: `The ${t} link doesn’t look like a Google Sheets link. Copy it from the browser bar while that tab is open.` }
+  }
+  const gids = TRADE_TABS.map((t) => /gid=(\d+)/.exec(tabs[t]!)?.[1] ?? '0')
+  if (new Set(gids).size < gids.length) return { error: 'Two of the links point to the same tab. Open each tab, then copy its link from the browser bar.' }
+  await savePriceSheetTabs(tabs)
+  await savePriceSheetUrl(null)
   const status = await syncFromSheet({ id: me.id, name: me.name || me.email }, guide())
   revalidatePath('/office/prices')
   return status

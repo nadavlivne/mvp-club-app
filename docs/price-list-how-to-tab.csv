@@ -1,15 +1,15 @@
 HOW TO ADD OR CHANGE ITEMS IN THE MVP PRICE LIST,,
-The app reads the first tab (the price list) about every 10 minutes and checks it before using it. This tab is just instructions — the app ignores it.,,
+"The price list has one tab per trade: Electrical, HVAC, Plumbing. The app reads those three tabs about every 10 minutes and checks them before using them. This tab is only instructions — the app ignores it.",,
 ,,
 ADD A NEW ITEM,,
-Step 1,Go to the price list tab and add a new row at the bottom.,
+Step 1,"Open the tab for the trade (Electrical, HVAC or Plumbing) and add a new row at the bottom.",
 Step 2,Fill in every column (see the table below). Don't leave a price empty.,
 Step 3,"Wait up to 10 minutes, or in the app go to Office → Price list → Sync now.",
-Step 4,Check the message in Office → Price list: ✓ means it's live. A red box tells you which row to fix — until then the app keeps the old prices.,
+Step 4,Check the message in Office → Price list: ✓ means it's live. A red box says which tab and row to fix — until then the app keeps the old prices.,
 ,,
 COLUMN,WHAT TO PUT,EXAMPLE
-code,"A new code nobody else uses. Start with the trade: EL- (electrical), HV- (heating & cooling), PL- (plumbing), then a number.",HV-142
-trade,"Exactly one of: Electrical, HVAC, Plumbing",HVAC
+code,"A new code nobody else uses. Electrical tab: EL-…, HVAC tab: HV-…, Plumbing tab: PL-…, then a number.",HV-142
+trade,"The same as the tab: Electrical, HVAC or Plumbing.",HVAC
 category,"A group name. Techs see items grouped by it (Panel, Drains, Motors, Replacement…).",Motors
 task,"What the job is, in plain words. Customers see this on estimates.",Replace ECM blower motor
 est_hours,Estimated hours (for reference only).,3
@@ -23,9 +23,9 @@ CHANGE A PRICE,Just edit the number in the cell. Reports and estimates already s
 REMOVE AN ITEM,Delete its row. The app won't allow removing an item that the check-up guide or the service call still uses — it will say which one.,
 ,,
 RULES,,
-,"Don't change, move or rename the first row of the price list (the column names).",
-,Don't rename or move the price list tab. Keep it as the FIRST tab.,
-,Each code only once. Don't reuse a code from a deleted item for something different.,
+,"Don't change, move or rename the first row of each trade tab (the column names).",
+,"Don't delete or rename the Electrical, HVAC and Plumbing tabs. If you ever re-link the sheet in the app, copy each tab's link while that tab is open.",
+,"Each code only once, across all three tabs. Don't reuse a code from a deleted item for something different.",
 ,"EL-100, HV-100 and PL-100 are the service calls ($19 members / $119 non-members). Don't delete them.",
 ,Service calls: the $119 is never credited toward the repair. Joining the club is the only way to get $19.,
 ,,
@@ -33,5 +33,5 @@ WHERE NEW ITEMS SHOW UP,,
 Service-call estimates,Right away — techs find it under “+ Add items from the price book”.,
 Check-ups,Only when a check-up finding points to its code. Ask to add or change a finding in the Inspection Guide.,
 ,,
-WHO CAN EDIT,"Editors: owner and office. Trades: Viewer or Commenter (they see prices, suggest changes with comments).",
+WHO CAN EDIT,Editors: owner and office. Trades: Viewer or Commenter (they see prices and suggest changes with comments).,
 HISTORY,"Every change the app publishes is listed in Office → Price list → History (what changed, when, by whom).",
