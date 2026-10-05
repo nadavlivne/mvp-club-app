@@ -29,7 +29,6 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [inArea, setInArea] = useState<boolean | undefined>()
-  const [trap, setTrap] = useState('')
   const [signature, setSignature] = useState<string | null>(null)
   const [agreed, setAgreed] = useState(false)
   const [pending, start] = useTransition()
@@ -52,7 +51,7 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
   const next = () => {
     setError(null)
     start(async () => {
-      const r = await saveJoinStep(step + 1, d, trap)
+      const r = await saveJoinStep(step + 1, d)
       if (!r.ok) return setError(r.error)
       if (r.inArea !== undefined) setInArea(r.inArea)
       setStep((s) => s + 1)
@@ -130,8 +129,6 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
             <Field label="Email (optional)">
               <input className={input} type="email" autoComplete="email" value={d.email} onChange={(e) => set('email', e.target.value)} />
             </Field>
-            {/* Hidden from people; bots fill it in. */}
-            <input tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" name="company" value={trap} onChange={(e) => setTrap(e.target.value)} />
           </>
         )}
 
@@ -146,7 +143,14 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
                 <input className={input} autoComplete="address-level2" value={d.city} onChange={(e) => set('city', e.target.value)} />
               </Field>
               <Field label="Zip">
-                <input className={input} inputMode="numeric" autoComplete="postal-code" maxLength={5} value={d.zip} onChange={(e) => set('zip', e.target.value.replace(/\D/g, ''))} />
+                <input
+                  className={input}
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  maxLength={5}
+                  value={d.zip}
+                  onChange={(e) => set('zip', e.target.value.replace(/\D/g, ''))}
+                />
               </Field>
             </div>
             <div className="flex flex-col gap-2">
@@ -165,7 +169,8 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
                 ))}
               </div>
               <span className="text-sm text-muted">
-                Membership covers one system; each extra one is +${membership.extraSystemMonthly}/month.
+                Membership covers one system; each extra one is +$
+                {membership.extraSystemMonthly}/month.
               </span>
             </div>
           </>
@@ -240,11 +245,17 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
               </div>
             </div>
             <Field label="Anything we should know? (optional)">
-              <textarea className={`${input} h-20 py-2`} value={d.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Gate code, pets, a problem you've noticed…" />
+              <textarea
+                className={`${input} h-20 py-2`}
+                value={d.notes}
+                onChange={(e) => set('notes', e.target.value)}
+                placeholder="Gate code, pets, a problem you've noticed…"
+              />
             </Field>
             <p className="rounded-lg bg-page p-3 text-sm leading-[1.45] text-body">{legal.joinTerms(priceText(d.plan), membership.firstTermMonths)}</p>
             <label className="flex min-h-11 items-center gap-3 text-[15px] font-semibold">
-              <input type="checkbox" className="size-6 accent-[#B8410F]" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />I agree to the membership terms above
+              <input type="checkbox" className="size-6 accent-[#B8410F]" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />I agree to the
+              membership terms above
             </label>
             <div className="flex flex-col gap-1.5">
               <span className="text-[15px] font-semibold">Sign with your finger</span>
@@ -266,15 +277,18 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
               {pending ? 'Saving…' : 'Continue'}
             </button>
           ) : (
-            <button type="button" onClick={finish} disabled={pending} className="h-14 flex-1 rounded-xl bg-approve text-lg font-bold text-white disabled:opacity-60">
+            <button
+              type="button"
+              onClick={finish}
+              disabled={pending}
+              className="h-14 flex-1 rounded-xl bg-approve text-lg font-bold text-white disabled:opacity-60"
+            >
               {pending ? 'Saving…' : `Join MVP Club — ${priceText(d.plan)}`}
             </button>
           )}
         </div>
       </div>
-      <p className="text-center text-sm text-muted">
-        No card on this website. Prefer to talk? Call or text {site.phoneDisplay}.
-      </p>
+      <p className="text-center text-sm text-muted">No card on this website. Prefer to talk? Call or text {site.phoneDisplay}.</p>
     </div>
   )
 }

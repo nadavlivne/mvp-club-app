@@ -13,8 +13,7 @@ import { adminClient } from '@/lib/supabase/server'
 const COOKIE = 'mvp_join'
 
 // Saves the form up to `step` (1 = contact, 2 = home, 3 = plan, 4 = details before signing).
-export async function saveJoinStep(step: number, data: JoinData, trap?: string): Promise<JoinResult> {
-  if (trap) return { ok: true } // hidden field only bots fill in
+export async function saveJoinStep(step: number, data: JoinData): Promise<JoinResult> {
   const problem = checkJoin(step, data)
   if (problem) return { ok: false, error: problem }
   if (!supabaseConfigured) return { ok: false, error: SAVE_ERROR }
