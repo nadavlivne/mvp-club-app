@@ -7,7 +7,7 @@ export const membership = {
   firstTermMonths: 12,
   // Membership covers one heating & cooling system; each extra one adds this much.
   extraSystemMonthly: 10,
-  // GUESS: yearly plan extra system = 12 × $10. Confirm with Nadav.
+  // Yearly plan: 12 × $10 per extra system (confirmed by Nadav).
   extraSystemYearly: 120,
   // Most systems someone can pick on the sign-up form (more = office follows up).
   maxSystems: 4,
