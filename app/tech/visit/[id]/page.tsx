@@ -3,7 +3,7 @@ import SetupProblem from '@/components/tech/SetupProblem'
 import VisitApp from '@/components/tech/VisitApp'
 import { loadCatalogLive, readSample } from '@/lib/data'
 import { supabaseConfigured } from '@/lib/supabase/config'
-import { userClient } from '@/lib/supabase/server'
+import { adminClient, userClient } from '@/lib/supabase/server'
 import { checkSetup } from '@/lib/supabase/setupCheck'
 import { approvalsFor } from '@/lib/approvals'
 import type { TechDay, VisitWork } from '@/lib/tech'
@@ -42,5 +42,15 @@ export default async function VisitPage({ params }: { params: Promise<{ id: stri
     supabase.from('techs').select('name').eq('id', user.id).single<{ name: string }>(),
   ])
   const approval = (await approvalsFor([id]))[id] ?? null
-  return <VisitApp visit={fromRow(row)} techName={tech?.name ?? ''} db initialWork={work?.work ?? null} approval={approval} {...catalog} />
+  const { data: signups } = await adminClient()
+    .from('leads')
+    .select('first_name, last_name, signed_at')
+    .eq('visit_id', id)
+    .not('signed_at', 'is', null)
+    .limit(1)
+    .returns<{ first_name: string; last_name: string; signed_at: string }[]>()
+  const memberSignup = signups?.[0] ? { name: `${signups[0].first_name} ${signups[0].last_name}`, at: signups[0].signed_at } : null
+  return (
+    <VisitApp visit={fromRow(row)} techName={tech?.name ?? ''} db initialWork={work?.work ?? null} approval={approval} memberSignup={memberSignup} {...catalog} />
+  )
 }

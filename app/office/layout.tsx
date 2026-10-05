@@ -2,14 +2,20 @@ import Link from 'next/link'
 import { signOut } from '@/app/tech/actions'
 import { Card, Logo } from '@/components/ui'
 import { currentStaff } from '@/lib/staff'
+import { adminClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Office · MVP Club' }
 
 export default async function OfficeLayout({ children }: { children: React.ReactNode }) {
   const staff = await currentStaff()
+  // New website leads waiting for the office (0 if the leads table isn't set up yet).
+  const { count: newLeads } = staff
+    ? await adminClient().from('leads').select('id', { count: 'exact', head: true }).in('status', ['started', 'signed_up'])
+    : { count: 0 }
   const nav = [
     { href: '/office', label: 'Approved jobs', ready: true, admin: false },
+    { href: '/office/leads', label: newLeads ? `Leads (${newLeads} new)` : 'Leads', ready: true, admin: false },
     { href: '/office/team', label: 'Team', ready: true, admin: true },
     { href: '/office/prices', label: 'Prices & check-up', ready: true, admin: true },
     { href: '#', label: 'Bonuses', ready: false, admin: true },

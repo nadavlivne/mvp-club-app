@@ -64,6 +64,10 @@ Brand:
 3. Housecall Pro API (create jobs on approval, receive paid-job webhooks), offline mode, security review (bring in a developer).
 4. Office dashboard: reminders, weekly tech bonus, partner scorecard.
 
+## Open tasks
+
+`docs/task-list.md` — decisions pending, questions for the Housecall Pro demo, what to build next. Keep it up to date.
+
 ## How to work with Nadav
 
 - Small steps. After each step: commit, push, tell him in two or three plain sentences what changed and give him the preview link.

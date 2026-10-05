@@ -1,0 +1,227 @@
+zip,city,state,miles_from_office
+45202,Cincinnati,OH,0.5
+45203,Cincinnati,OH,0.8
+45219,Cincinnati,OH,1.6
+41073,Bellevue,KY,1.7
+45206,Cincinnati,OH,2.1
+41074,Dayton,KY,2.2
+41016,Covington,KY,2.4
+41011,Covington,KY,2.4
+45214,Cincinnati,OH,2.5
+45220,Cincinnati,OH,2.8
+41014,Covington,KY,2.8
+45207,Cincinnati,OH,3.3
+45229,Cincinnati,OH,3.3
+45204,Cincinnati,OH,3.3
+45205,Cincinnati,OH,3.5
+41075,Fort Thomas,KY,3.6
+45225,Cincinnati,OH,3.6
+41071,Newport,KY,3.7
+45217,Cincinnati,OH,4.3
+45226,Cincinnati,OH,4.4
+45201,Cincinnati,OH,4.6
+45221,Cincinnati,OH,4.6
+45222,Cincinnati,OH,4.6
+45234,Cincinnati,OH,4.6
+45235,Cincinnati,OH,4.6
+45250,Cincinnati,OH,4.6
+45253,Cincinnati,OH,4.6
+45254,Cincinnati,OH,4.6
+45258,Cincinnati,OH,4.6
+45262,Cincinnati,OH,4.6
+45263,Cincinnati,OH,4.6
+45264,Cincinnati,OH,4.6
+45267,Cincinnati,OH,4.6
+45268,Cincinnati,OH,4.6
+45269,Cincinnati,OH,4.6
+45270,Cincinnati,OH,4.6
+45271,Cincinnati,OH,4.6
+45273,Cincinnati,OH,4.6
+45274,Cincinnati,OH,4.6
+45277,Cincinnati,OH,4.6
+45296,Cincinnati,OH,4.6
+45298,Cincinnati,OH,4.6
+45999,Cincinnati,OH,4.6
+45208,Cincinnati,OH,4.6
+45275,Cincinnati,OH,4.9
+45280,Cincinnati,OH,4.9
+45223,Cincinnati,OH,4.9
+45212,Cincinnati,OH,5.2
+45238,Cincinnati,OH,5.4
+45209,Cincinnati,OH,5.5
+45232,Cincinnati,OH,5.6
+45211,Cincinnati,OH,5.7
+41015,Latonia,KY,5.7
+45228,California,OH,5.7
+41017,Ft Mitchell,KY,5.8
+45237,Cincinnati,OH,6.4
+41076,Newport,KY,6.6
+45224,Cincinnati,OH,6.6
+45216,Cincinnati,OH,6.8
+45051,Mount Saint Joseph,OH,7.1
+45213,Cincinnati,OH,7.1
+41025,Erlanger,KY,7.1
+45227,Cincinnati,OH,7.5
+45230,Cincinnati,OH,7.6
+41021,Hebron,KY,7.8
+45239,Cincinnati,OH,7.9
+45233,Cincinnati,OH,8.0
+41085,Silver Grove,KY,8.0
+41018,Erlanger,KY,8.1
+45244,Cincinnati,OH,8.6
+45248,Cincinnati,OH,9.2
+45215,Cincinnati,OH,9.4
+45236,Cincinnati,OH,9.6
+45231,Cincinnati,OH,9.7
+45255,Cincinnati,OH,9.7
+41042,Florence,KY,10.4
+41048,Hebron,KY,10.4
+45243,Cincinnati,OH,10.5
+45247,Cincinnati,OH,10.7
+41059,Melbourne,KY,10.8
+45001,Addyston,OH,10.9
+45299,Cincinnati,OH,10.9
+41012,Covington,KY,11.0
+41019,Covington,KY,11.0
+45218,Cincinnati,OH,11.2
+45174,Terrace Park,OH,11.4
+41051,Independence,KY,11.8
+45052,North Bend,OH,12.1
+45251,Cincinnati,OH,12.2
+45241,Cincinnati,OH,12.3
+41072,Newport,KY,12.3
+41099,Newport,KY,12.3
+45240,Cincinnati,OH,12.5
+45246,Cincinnati,OH,12.6
+45245,Cincinnati,OH,12.6
+45252,Cincinnati,OH,12.9
+41001,Alexandria,KY,12.9
+45041,Miamitown,OH,12.9
+45242,Cincinnati,OH,13.1
+45111,Camp Dennison,OH,13.4
+45002,Cleves,OH,13.5
+45147,Miamiville,OH,13.6
+45033,Hooven,OH,14.4
+45249,Cincinnati,OH,14.9
+41005,Burlington,KY,15.4
+45150,Milford,OH,15.5
+45014,Fairfield,OH,15.5
+41022,Florence,KY,16.1
+41091,Union,KY,16.1
+45061,Ross,OH,16.2
+41094,Walton,KY,16.4
+41053,Kenton,KY,16.6
+45140,Loveland,OH,16.6
+45071,West Chester,OH,16.7
+45015,Hamilton,OH,17.0
+45102,Amelia,OH,17.1
+41007,California,KY,17.2
+45069,West Chester,OH,17.3
+45157,New Richmond,OH,18.0
+41080,Petersburg,KY,18.0
+45030,Harrison,OH,18.1
+41063,Morning View,KY,18.3
+45063,Shandon,OH,18.7
+45040,Mason,OH,19.1
+47025,Lawrenceburg,IN,19.2
+45103,Batavia,OH,19.6
+45025,Hamilton,OH,19.9
+45026,Hamilton,OH,19.9
+45160,Owensville,OH,20.2
+45039,Maineville,OH,20.5
+41092,Verona,KY,20.7
+45011,Hamilton,OH,20.8
+47040,Rising Sun,IN,22.3
+45053,Okeana,OH,22.3
+45122,Goshen,OH,22.5
+45034,Kings Mills,OH,22.5
+41006,Butler,KY,22.8
+41030,Crittenden,KY,23.3
+45158,Newtonsville,OH,23.4
+47001,Aurora,IN,23.4
+45012,Hamilton,OH,23.5
+45018,Fairfield,OH,23.5
+45013,Hamilton,OH,23.6
+41033,De Mossville,KY,23.7
+45153,Moscow,OH,24.0
+45055,Overpeck,OH,24.0
+47060,West Harrison,IN,24.0
+45065,South Lebanon,OH,24.5
+45050,Monroe,OH,24.5
+45145,Marathon,OH,24.8
+45106,Bethel,OH,25.1
+45176,Williamsburg,OH,25.1
+47022,Guilford,IN,25.2
+47038,Patriot,IN,25.2
+47035,New Trenton,IN,25.3
+45162,Pleasant Plain,OH,25.6
+45156,Neville,OH,25.9
+45062,Seven Mile,OH,26.0
+45067,Trenton,OH,26.1
+47016,Cedar Grove,IN,26.4
+45152,Morrow,OH,26.9
+41035,Dry Ridge,KY,28.3
+45043,Middletown,OH,28.4
+45036,Lebanon,OH,28.8
+41095,Warsaw,KY,28.8
+45004,Collinsville,OH,28.9
+45044,Middletown,OH,29.0
+45120,Felicity,OH,29.3
+45112,Chilo,OH,29.4
+47032,Moores Hill,IN,29.7
+47018,Dillsboro,IN,30.2
+47020,Florence,IN,30.2
+47019,East Enterprise,IN,30.2
+45042,Middletown,OH,30.3
+45154,Mount Orab,OH,30.5
+45056,Oxford,OH,30.5
+45130,Hamersville,OH,30.6
+45118,Fayetteville,OH,30.6
+41046,Glencoe,KY,30.9
+41043,Foster,KY,31.0
+45119,Feesburg,OH,31.1
+41040,Falmouth,KY,31.7
+45064,Somerville,OH,31.7
+45005,Franklin,OH,31.8
+45107,Blanchester,OH,31.9
+47010,Bath,IN,32.4
+47041,Sunman,IN,32.6
+45054,Oregonia,OH,32.6
+41086,Sparta,KY,32.9
+41097,Williamstown,KY,33.0
+47031,Milan,IN,33.5
+45070,West Elkton,OH,33.6
+47011,Bennington,IN,34.0
+47012,Brookville,IN,34.1
+45066,Springboro,OH,35.1
+41052,Jonesville,KY,35.1
+45110,Buford,OH,35.5
+41054,Mason,KY,35.5
+45148,Midland,OH,35.5
+47021,Friendship,IN,35.6
+45311,Camden,OH,35.6
+47003,West College Corner,IN,35.9
+45113,Clarksville,OH,36.0
+45121,Georgetown,OH,36.1
+45003,College Corner,OH,36.2
+41002,Augusta,KY,36.4
+45131,Higginsport,OH,36.4
+45327,Germantown,OH,36.6
+45068,Waynesville,OH,37.2
+47033,Morris,IN,37.6
+45330,Gratis,OH,37.6
+41004,Brooksville,KY,38.3
+40355,New Liberty,KY,38.3
+47042,Versailles,IN,38.4
+45032,Harveysburg,OH,38.4
+47043,Vevay,IN,38.5
+45142,Lynchburg,OH,38.7
+45342,Miamisburg,OH,38.7
+45114,Cuba,OH,39.1
+47017,Cross Plains,IN,39.2
+45458,Dayton,OH,39.2
+45171,Sardinia,OH,39.2
+41083,Sanders,KY,39.5
+41045,Ghent,KY,39.6
+41010,Corinth,KY,39.9
+47039,Pierceville,IN,39.9
