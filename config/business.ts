@@ -60,5 +60,5 @@ export const diagnosticCopy = {
 export const estimateOptions = 3
 
 export const company = {
-  phone: '[MVP PHONE]',
+  phone: '(513) 909-9656', // temporary number (same as config/site.ts)
 }

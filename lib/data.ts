@@ -72,3 +72,10 @@ export async function loadCatalogLive() {
   const [guide, book] = await Promise.all([liveGuide(), livePriceBook()])
   return { guide, book }
 }
+
+// Zip codes we serve (data/service_area.csv), limited to the radius in config/site.ts.
+export function loadServiceArea(maxMiles: number) {
+  return readCsv('service_area.csv')
+    .filter((r) => Number(r.miles_from_office) <= maxMiles)
+    .map((r) => ({ zip: r.zip, city: r.city, state: r.state }))
+}
