@@ -2,6 +2,7 @@ import 'server-only'
 import readXlsx from 'read-excel-file/node'
 import writeXlsx from 'write-excel-file/node'
 import { PRICE_SHEET_HOW_TO } from './priceSheetHowTo'
+import { CHECKLIST_TABS, GUIDE_COLUMNS, checkGuideRows, diffGuides, guideSheets, guideSource, liveGuide, publishGuide } from './guideBook'
 import { serviceCallCode } from '@/config/business'
 import { parseCsv } from './csv'
 import { loadPriceBook } from './data'
@@ -220,7 +221,8 @@ export function toCsv(rows: PriceBookRow[]): string {
 export type SyncStatus = { at: string; ok: boolean; message: string; errors?: string[] }
 // One link per trade tab (Electrical / HVAC / Plumbing), or a single link for a one-tab sheet.
 export const TRADE_TABS = ['Electrical', 'HVAC', 'Plumbing'] as const
-export type SheetTabs = Partial<Record<(typeof TRADE_TABS)[number], string>>
+// Keys: the price tabs (Electrical / HVAC / Plumbing) and the check-up tabs (Check-up Electrical …).
+export type SheetTabs = Partial<Record<string, string>>
 export type PriceSettings = { sheetUrl: string | null; tabs: SheetTabs | null; lastCheckedAt: string | null; lastSync: SyncStatus | null }
 
 const SYNC_EVERY_MS = 10 * 60 * 1000
@@ -265,7 +267,28 @@ export function sheetCsvUrl(link: string): string | null {
   return `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`
 }
 
-export async function syncFromSheet(by: { id: string | null; name: string }, guide: GuideRow[]): Promise<SyncStatus> {
+type TabRead = { rows: Record<string, string>[] } | { error: string }
+
+// Reads one tab of the Google Sheet as rows (column names normalised).
+async function readTab(link: string, name: string, columns: readonly string[]): Promise<TabRead> {
+  const csvUrl = sheetCsvUrl(link)
+  if (!csvUrl) return { error: `${name}: that isn't a Google Sheets link.` }
+  let text: string
+  try {
+    const res = await fetch(csvUrl, { cache: 'no-store', redirect: 'follow', signal: AbortSignal.timeout(10_000) })
+    text = await res.text()
+    if (!res.ok || /^\s*<!DOCTYPE html|<html/i.test(text)) return { error: `${name}: could not read it. In the sheet, set Share → "Anyone with the link" → Viewer.` }
+  } catch {
+    return { error: 'Google Sheets did not answer. The app will try again shortly.' }
+  }
+  const rows = parseCsv(text.replace(/^\uFEFF/, '')).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [norm(k), v])))
+  if (!rows.length) return { error: `${name} is empty — or the link points to the wrong tab.` }
+  const missing = columns.filter((c) => !(c in rows[0]))
+  if (missing.length) return { error: `${name}: missing columns ${missing.join(', ')}. Is the link pointing to the right tab?` }
+  return { rows }
+}
+
+export async function syncFromSheet(by: { id: string | null; name: string }): Promise<SyncStatus> {
   const settings = await getPriceSettings()
   const now = new Date().toISOString()
   await setSetting('price_sheet_checked_at', now)
@@ -274,66 +297,83 @@ export async function syncFromSheet(by: { id: string | null; name: string }, gui
     await setSetting('price_sheet_last_sync', status)
     return status
   }
-  // Which tabs to read: one per trade, or the single linked sheet.
-  const sources: { tab: string | null; link: string }[] = hasTabs(settings)
+  // Price tabs: one per trade, or the single linked sheet.
+  const priceSources: { tab: string | null; link: string }[] = hasTabs(settings)
     ? TRADE_TABS.map((t) => ({ tab: t, link: settings.tabs?.[t] ?? '' }))
     : settings.sheetUrl
       ? [{ tab: null, link: settings.sheetUrl }]
       : []
-  if (!sources.length) return done({ ok: false, message: 'No Google Sheet linked yet.' })
-  const missingTabs = sources.filter((x) => !x.link).map((x) => x.tab)
+  if (!priceSources.length) return done({ ok: false, message: 'No Google Sheet linked yet.' })
+  // Check-up tabs (optional): all three or none.
+  const checkSources = (Object.entries(CHECKLIST_TABS) as [string, string][]).map(([trade, tab]) => ({ trade, tab, link: settings.tabs?.[tab] ?? '' }))
+  const checklistLinked = checkSources.some((x) => x.link)
+  const missingTabs = [...priceSources.filter((x) => !x.link).map((x) => x.tab), ...(checklistLinked ? checkSources.filter((x) => !x.link).map((x) => x.tab) : [])]
   if (missingTabs.length) return done({ ok: false, message: `Missing the link for the ${missingTabs.join(' and ')} tab.` })
 
-  const raw: Record<string, string>[] = []
-  for (const src of sources) {
-    const csvUrl = sheetCsvUrl(src.link)
-    const name = src.tab ? `${src.tab} tab` : 'The sheet'
-    if (!csvUrl) return done({ ok: false, message: `${name}: that isn't a Google Sheets link.` })
-    let text: string
-    try {
-      const res = await fetch(csvUrl, { cache: 'no-store', redirect: 'follow', signal: AbortSignal.timeout(10_000) })
-      text = await res.text()
-      if (!res.ok || /^\s*<!DOCTYPE html|<html/i.test(text))
-        return done({ ok: false, message: `${name}: could not read it. In the sheet, set Share → "Anyone with the link" → Viewer.` })
-    } catch {
-      return done({ ok: false, message: 'Google Sheets did not answer. The app will try again shortly.' })
-    }
-    const rows = parseCsv(text.replace(/^\uFEFF/, '')).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [norm(k), v])))
-    const missingCols = PRICE_COLUMNS.filter((c) => rows.length && !(c in rows[0]))
-    if (!rows.length) return done({ ok: false, message: `${name} is empty — or the link points to the wrong tab (e.g. How to).` })
-    if (missingCols.length)
-      return done({ ok: false, message: `${name}: missing columns ${missingCols.join(', ')}. Is the link pointing to the right tab?` })
-    rows.forEach((r, i) => {
-      r._where = src.tab ? `${src.tab} tab, row ${i + 2}` : `Row ${i + 2}`
-      if (src.tab) r._tab = src.tab
+  const priceRaw: Record<string, string>[] = []
+  for (const src of priceSources) {
+    const r = await readTab(src.link, src.tab ? `${src.tab} tab` : 'The sheet', PRICE_COLUMNS)
+    if ('error' in r) return done({ ok: false, message: r.error })
+    r.rows.forEach((row, i) => {
+      row._where = src.tab ? `${src.tab} tab, row ${i + 2}` : `Row ${i + 2}`
+      if (src.tab) row._tab = src.tab
     })
-    raw.push(...rows)
+    priceRaw.push(...r.rows)
   }
-  const { rows, errors } = checkPriceRows(raw, guide)
-  if (errors.length) return done({ ok: false, message: 'The sheet has problems, so the app is still using the last good prices.', errors })
+  const guideRaw: Record<string, string>[] = []
+  for (const src of checklistLinked ? checkSources : []) {
+    const r = await readTab(src.link, `${src.tab} tab`, GUIDE_COLUMNS)
+    if ('error' in r) return done({ ok: false, message: r.error })
+    r.rows.forEach((row, i) => {
+      row._where = `${src.tab} tab, row ${i + 2}`
+      row._tab = src.trade
+    })
+    guideRaw.push(...r.rows)
+  }
 
-  const changes = diffPriceBooks(await livePriceBook(), rows)
-  const count = changes.added.length + changes.removed.length + changes.changed.length
-  if (!count && (await priceBookSource()) === 'database') return done({ ok: true, message: 'Up to date — no changes in the sheet.' })
-  await publishPriceBook(rows, changes, { id: by.id ?? '', name: by.name }, 'Google Sheet')
-  return done({ ok: true, message: count ? `Published ${count} ${count === 1 ? 'change' : 'changes'} from the sheet.` : 'Price list loaded from the sheet.' })
+  // Check both together: findings must point to codes in the new price list, and the
+  // price list must keep every code the (new) checklist uses.
+  const priceCodes = new Set(priceRaw.map((r) => (r.code ?? '').trim().toUpperCase()).filter(Boolean))
+  const guideCheck = checklistLinked ? checkGuideRows(guideRaw, priceCodes) : { rows: [...(await liveGuide()).values()], errors: [] }
+  const priceCheck = checkPriceRows(priceRaw, guideCheck.rows)
+  const errors = [...priceCheck.errors, ...guideCheck.errors]
+  if (errors.length) return done({ ok: false, message: 'The sheet has problems, so the app is still using the last good version.', errors })
+
+  const byWho = { id: by.id ?? '', name: by.name }
+  const parts: string[] = []
+  const priceChanges = diffPriceBooks(await livePriceBook(), priceCheck.rows)
+  const nPrice = priceChanges.added.length + priceChanges.removed.length + priceChanges.changed.length
+  if (nPrice || (await priceBookSource()) === 'file') {
+    await publishPriceBook(priceCheck.rows, priceChanges, byWho, 'Google Sheet')
+    parts.push(nPrice ? `${nPrice} price ${nPrice === 1 ? 'change' : 'changes'}` : 'the price list')
+  }
+  if (checklistLinked) {
+    const { reordered, ...guideChanges } = diffGuides(await liveGuide(), guideCheck.rows)
+    const nGuide = guideChanges.added.length + guideChanges.removed.length + guideChanges.changed.length
+    if (nGuide || reordered || (await guideSource()) === 'file') {
+      await publishGuide(guideCheck.rows, guideChanges, byWho, 'Google Sheet')
+      parts.push(nGuide ? `${nGuide} check-up ${nGuide === 1 ? 'change' : 'changes'}` : reordered ? 'the new check-up order' : 'the check-up list')
+    }
+  }
+  if (!parts.length) return done({ ok: true, message: 'Up to date — no changes in the sheet.' })
+  return done({ ok: true, message: `Published ${parts.join(' and ')} from the sheet.` })
 }
 
 // Called when prices are used: if the last check is older than 10 minutes, sync in the background.
-export async function syncIfDue(guide: GuideRow[]) {
+export async function syncIfDue() {
   if (!supabaseConfigured || !process.env.SUPABASE_SECRET_KEY) return
   try {
     const s = await getPriceSettings()
     if (!sheetLinked(s)) return
     if (s.lastCheckedAt && Date.now() - new Date(s.lastCheckedAt).getTime() < SYNC_EVERY_MS) return
-    await syncFromSheet({ id: null, name: 'Automatic sync' }, guide)
+    await syncFromSheet({ id: null, name: 'Automatic sync' })
   } catch {
     // Never let a sync problem break a page; the office sees the last status.
   }
 }
 
 // The price list as an Excel file: one tab per trade, plus the How to tab.
-export async function toXlsx(rows: PriceBookRow[]): Promise<Buffer> {
+export async function toXlsx(rows: PriceBookRow[], guide: GuideRow[]): Promise<Buffer> {
   const header = PRICE_COLUMNS.map((c) => ({ value: c as string, fontWeight: 'bold' as const }))
   const tradeSheet = (trade: string) => ({
     sheet: trade,
@@ -366,5 +406,5 @@ export async function toXlsx(rows: PriceBookRow[]): Promise<Buffer> {
     ),
   }
   // Same column order Google Sheets expects; cells without a value are fine.
-  return writeXlsx([...TRADE_TABS.map(tradeSheet), howTo] as Parameters<typeof writeXlsx>[0]).toBuffer()
+  return writeXlsx([...TRADE_TABS.map(tradeSheet), ...guideSheets(guide), howTo] as Parameters<typeof writeXlsx>[0]).toBuffer()
 }

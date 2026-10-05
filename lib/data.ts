@@ -61,13 +61,14 @@ export function loadCatalog() {
   return { guide: loadInspectionGuide(), book: loadPriceBook() }
 }
 
-// Like loadCatalog, but prices come from the office price list (database) once it
-// has been published; until then from data/pricebook.csv.
+// Like loadCatalog, but prices and the check-up checklist come from what the office
+// published (database); until then from data/pricebook.csv and data/inspection_guide.csv.
 export async function loadCatalogLive() {
   const { livePriceBook, syncIfDue } = await import('./priceBook')
+  const { liveGuide } = await import('./guideBook')
   const { after } = await import('next/server')
-  const guide = loadInspectionGuide()
   // Check the Google Sheet after the page is sent, so pages stay fast.
-  after(() => syncIfDue([...guide.values()]))
-  return { guide, book: await livePriceBook() }
+  after(() => syncIfDue())
+  const [guide, book] = await Promise.all([liveGuide(), livePriceBook()])
+  return { guide, book }
 }

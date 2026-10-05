@@ -11,7 +11,7 @@ export default async function OfficeLayout({ children }: { children: React.React
   const nav = [
     { href: '/office', label: 'Approved jobs', ready: true, admin: false },
     { href: '/office/team', label: 'Team', ready: true, admin: true },
-    { href: '/office/prices', label: 'Price list', ready: true, admin: true },
+    { href: '/office/prices', label: 'Prices & check-up', ready: true, admin: true },
     { href: '#', label: 'Bonuses', ready: false, admin: true },
   ]
   return (

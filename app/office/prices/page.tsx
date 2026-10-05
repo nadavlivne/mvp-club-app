@@ -1,5 +1,7 @@
 import { Card } from '@/components/ui'
 import { money } from '@/lib/pricing'
+import { ratings, tradeInfo } from '@/config/business'
+import { guideSource, liveGuide } from '@/lib/guideBook'
 import { getPriceSettings, livePriceBook, priceBookSource, type PriceChanges } from '@/lib/priceBook'
 import { adminClient } from '@/lib/supabase/server'
 import { requireStaff } from '@/lib/staff'
@@ -7,7 +9,7 @@ import PricesClient from './PricesClient'
 
 export const metadata = { title: 'Price list · MVP Club office' }
 
-type Version = { id: string; published_at: string; published_by_name: string; file_name: string; row_count: number; changes: PriceChanges }
+type Version = { id: string; kind: string; published_at: string; published_by_name: string; file_name: string; row_count: number; changes: PriceChanges }
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
@@ -15,13 +17,15 @@ const fmt = (iso: string) =>
 // Admin only: where prices come from, keeping them in sync, and the change history.
 export default async function PricesPage() {
   await requireStaff('admin')
-  const [settings, source, book, versions] = await Promise.all([
+  const [settings, source, book, gSource, guide, versions] = await Promise.all([
     getPriceSettings().catch(() => null),
     priceBookSource(),
     livePriceBook(),
+    guideSource(),
+    liveGuide(),
     adminClient()
       .from('price_book_versions')
-      .select('id, published_at, published_by_name, file_name, row_count, changes')
+      .select('*')
       .order('published_at', { ascending: false })
       .limit(15)
       .returns<Version[]>()
@@ -32,7 +36,7 @@ export default async function PricesPage() {
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-3.5 px-4 py-5">
-      <h1 className="font-display text-[28px] font-bold">Price list</h1>
+      <h1 className="font-display text-[28px] font-bold">Price list &amp; check-up</h1>
       {notSetUp ? (
         <Card className="border-2 border-[#F2B705] text-[15px]">
           One more setup step: run <b>supabase/migrations/20261005000000_price_book.sql</b> in Supabase → SQL Editor. Until then the app uses the price
@@ -45,6 +49,8 @@ export default async function PricesPage() {
           lastSync={settings.lastSync}
           source={source}
           count={rows.length}
+          guideSource={gSource}
+          guideCount={guide.size}
         />
       )}
 
@@ -58,6 +64,7 @@ export default async function PricesPage() {
               <details key={v.id} className="border-t border-line pt-2 first-of-type:border-0">
                 <summary className="flex min-h-11 cursor-pointer flex-wrap items-center gap-x-3 text-[15px]">
                   <b>{fmt(v.published_at)}</b>
+                  <span className="rounded-full bg-page px-2 py-0.5 text-xs font-bold text-muted">{v.kind === 'checklist' ? 'Check-up' : 'Price list'}</span>
                   <span className="text-body">
                     {n} {n === 1 ? 'change' : 'changes'} · from {v.file_name || 'upload'} · by {v.published_by_name || '—'}
                   </span>
@@ -111,6 +118,52 @@ export default async function PricesPage() {
             </tbody>
           </table>
         </div>
+      </Card>
+
+      <Card className="flex flex-col gap-2">
+        <div className="text-base font-bold">Check-up findings ({guide.size})</div>
+        {(['HVAC', 'Plumbing', 'Electrical'] as const).map((t) => (
+          <details key={t} className="border-t border-line pt-2 first-of-type:border-0">
+            <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-[15px] font-semibold">
+              <span className="h-4 w-1.5 rounded-sm" style={{ background: tradeInfo[t].color }} />
+              {tradeInfo[t].label} ({[...guide.values()].filter((g) => g.trade === t).length})
+            </summary>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-left text-sm">
+                <thead className="text-xs text-muted">
+                  <tr>
+                    <th className="py-1 pr-3">Id</th>
+                    <th className="py-1 pr-3">Area</th>
+                    <th className="py-1 pr-3">Finding</th>
+                    <th className="py-1 pr-3">Rating</th>
+                    <th className="py-1 pr-3">Price code</th>
+                    <th className="py-1">Customer sees</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...guide.values()]
+                    .filter((g) => g.trade === t)
+                    .map((g) => (
+                      <tr key={g.id} className="border-t border-line align-top">
+                        <td className="py-1.5 pr-3 font-mono text-xs whitespace-nowrap">{g.id}</td>
+                        <td className="py-1.5 pr-3">{g.area}</td>
+                        <td className="py-1.5 pr-3">{g.finding}</td>
+                        <td className="py-1.5 pr-3">
+                          <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: ratings[g.rating].bg, color: ratings[g.rating].fg }}>
+                            {g.rating}
+                          </span>
+                        </td>
+                        <td className="py-1.5 pr-3 font-mono text-xs whitespace-nowrap">{g.pricebookCode || '—'}</td>
+                        <td className="py-1.5 text-xs text-body">
+                          <b>{g.customerTitle}</b> — {g.customerMessage}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        ))}
       </Card>
     </main>
   )
