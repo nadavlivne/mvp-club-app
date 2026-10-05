@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import SetupProblem from '@/components/tech/SetupProblem'
 import TechToday from '@/components/tech/TechToday'
-import { loadCatalog, readSample } from '@/lib/data'
+import { loadCatalogLive, readSample } from '@/lib/data'
 import { supabaseConfigured, todayET } from '@/lib/supabase/config'
 import { userClient } from '@/lib/supabase/server'
 import { checkSetup } from '@/lib/supabase/setupCheck'
@@ -16,7 +16,7 @@ export const metadata = { title: "Today's visits · MVP Tech" }
 export const dynamic = 'force-dynamic'
 
 export default async function TechPage() {
-  const guide = [...loadCatalog().guide.values()]
+  const guide = [...(await loadCatalogLive()).guide.values()]
   const dateText = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'America/New_York' })
 
   // No database keys yet: the sample day, saved on the device.

@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { tradeInfo } from '@/config/business'
-import { loadCatalog, readSample } from '@/lib/data'
+import { loadCatalogLive, readSample } from '@/lib/data'
 import { todayET } from '@/lib/supabase/config'
 import { adminClient, userClient } from '@/lib/supabase/server'
 import { checkSetup, explain } from '@/lib/supabase/setupCheck'
@@ -85,7 +85,7 @@ export async function sendToCustomer(visitId: string): Promise<{ path: string } 
 
   const visit = fromRow(visitRow)
   const work = workRow.work
-  const catalog = loadCatalog()
+  const catalog = await loadCatalogLive()
   const techName = tech?.name || 'your MVP tech'
   const today = todayET()
 

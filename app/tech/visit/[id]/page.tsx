@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import SetupProblem from '@/components/tech/SetupProblem'
 import VisitApp from '@/components/tech/VisitApp'
-import { loadCatalog, readSample } from '@/lib/data'
+import { loadCatalogLive, readSample } from '@/lib/data'
 import { supabaseConfigured } from '@/lib/supabase/config'
 import { userClient } from '@/lib/supabase/server'
 import { checkSetup } from '@/lib/supabase/setupCheck'
@@ -13,7 +13,7 @@ export const metadata = { title: 'Visit · MVP Tech' }
 
 export default async function VisitPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { guide, book } = loadCatalog()
+  const { guide, book } = await loadCatalogLive()
   const catalog = { guide: [...guide.values()], book: [...book.values()] }
 
   // No database keys yet: the sample day, saved on the device.

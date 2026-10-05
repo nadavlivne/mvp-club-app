@@ -5,6 +5,7 @@ export type PriceBookRow = {
   trade: string
   category: string
   task: string
+  estHours?: string
   standardPrice: number
   memberPrice: number
   rateType: 'Service' | 'Install'

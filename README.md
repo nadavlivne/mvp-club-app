@@ -33,6 +33,10 @@ links and approvals.
 5. Office area (`/office`): run `supabase/migrations/20260930000000_office.sql` (safe to re-run), then add
    staff rows: `insert into public.staff (id, role, name) select id, 'admin', 'Nadav' from auth.users where email = '…';`
    Roles: `admin` sees everything; `office` sees approved jobs and scheduling, no revenue or bonus totals.
+6. Price list (`/office/prices`, admin): run `supabase/migrations/20261005000000_price_book.sql`. Link a Google
+   Sheet (the master list; trades can be given view access) — the app checks it every ~10 minutes and on
+   "Sync now", publishes valid changes and logs them; a broken sheet never replaces good prices. Excel/CSV
+   upload is the backup. Until a list is published, `data/pricebook.csv` is used.
 
 Local development: `npx supabase start` (Docker), then put the local URL and keys in `.env.local`.
 

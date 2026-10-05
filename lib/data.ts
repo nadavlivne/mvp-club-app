@@ -18,6 +18,7 @@ export function loadPriceBook(): Map<string, PriceBookRow> {
     trade: r.trade,
     category: r.category,
     task: r.task,
+    estHours: r.est_hours,
     standardPrice: Number(r.standard_price),
     memberPrice: Number(r.member_price),
     rateType: r.rate_type === 'Install' ? 'Install' : 'Service',
@@ -58,4 +59,15 @@ export function readSample<T>(name: string): T {
 
 export function loadCatalog() {
   return { guide: loadInspectionGuide(), book: loadPriceBook() }
+}
+
+// Like loadCatalog, but prices come from the office price list (database) once it
+// has been published; until then from data/pricebook.csv.
+export async function loadCatalogLive() {
+  const { livePriceBook, syncIfDue } = await import('./priceBook')
+  const { after } = await import('next/server')
+  const guide = loadInspectionGuide()
+  // Check the Google Sheet after the page is sent, so pages stay fast.
+  after(() => syncIfDue([...guide.values()]))
+  return { guide, book: await livePriceBook() }
 }
