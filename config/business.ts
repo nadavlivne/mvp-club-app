@@ -22,6 +22,14 @@ export const replacementCredits: Record<string, number> = {
   Large: 500,
 }
 
+// What each credit size covers, in customer words (website table and FAQ).
+// Keep in step with the credit_tier column in data/pricebook.csv.
+export const replacementCreditExamples: Record<string, string> = {
+  Small: 'Water heater or EV charger',
+  Medium: 'Furnace, AC condenser or main water line',
+  Large: 'Full heating & cooling system, heat pump, electrical panel or service upgrade, standby generator or whole-house repipe',
+}
+
 // Diagnostic / service call code per trade (members $19, non-members $119 —
 // the amounts come from the price book).
 export const serviceCallCode: Record<string, string> = {

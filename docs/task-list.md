@@ -33,6 +33,9 @@ After the demo: Nadav puts the API key into Vercel as `HOUSECALL_PRO_API_KEY` (n
 
 ## Waiting on Nadav
 
+- License numbers for the trade partners (Galley Electric, Renew Mechanical, plumbing partner) for each state we serve: Ohio, Kentucky, Indiana. They go in `config/trust.ts` and appear in the website footer.
+- Trust facts for the website (`config/trust.ts`): years of experience, licensed / insured confirmed, Google reviews link, team or van photo.
+- MVP's own phone number and address, to replace Yolo's (513-909-9656, 114 E 8th St) in `config/site.ts`.
 - Register with Housecall Pro (MAX plan) and book the demo (questions above).
 - Google Business Profile: business.google.com — MVP Club, (513) 909-9656, 114 E 8th St, Mon–Fri 8–5, joinmvpclub.com.
 - Google Search Console for joinmvpclub.com (after the site is live).
@@ -52,7 +55,8 @@ All wording is in `config/legal.ts`:
 ## To build next
 
 - Tell the office (text or email) when a new lead arrives.
-- A page for each trade and for the main towns (Google searches like "furnace check-up West Chester").
+- Town pages for Northern Kentucky and SE Indiana — only after the partners' licenses there are confirmed (Ohio service and town pages are built: `config/seo-pages.ts`).
+- Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
   - The review should cover spam protection for the website sign-up form (rate limit or a captcha such as Cloudflare Turnstile). Don't use a hidden "trap" field: phone autofill fills it, and real people's leads were dropped.
 - Phase 4: weekly tech bonus, partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).

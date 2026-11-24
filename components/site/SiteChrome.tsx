@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { legal } from '@/config/legal'
 import { site } from '@/config/site'
+import { tradePartners } from '@/config/trust'
+
+const licensedPartners = tradePartners.filter((p) => p.licenses.length > 0)
 
 export function SiteLogo() {
   return (
@@ -18,6 +21,7 @@ export function SiteLogo() {
 
 const links = [
   { href: '/#checkup', label: 'What we check' },
+  { href: '/services', label: 'Services' },
   { href: '/#membership', label: 'Membership' },
   { href: '/service-area', label: 'Service area' },
   { href: '/#faq', label: 'Questions' },
@@ -87,6 +91,12 @@ export function SiteFooter() {
         </nav>
       </div>
       <p className="mx-auto max-w-5xl px-4 pb-3 text-xs text-sub">{legal.notInsurance}</p>
+      {licensedPartners.length > 0 && (
+        <p className="mx-auto max-w-5xl px-4 pb-3 text-xs text-sub">
+          {legal.licensedWork}{' '}
+          {licensedPartners.map((p) => `${p.company} (${p.trade.toLowerCase()}: ${p.licenses.join(', ')})`).join('; ')}.
+        </p>
+      )}
       <div className="mx-auto flex max-w-5xl justify-between px-4 pb-8 text-xs text-sub">
         <span>
           © {new Date().getFullYear()} {site.legalName}
