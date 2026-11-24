@@ -19,6 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${s.title} | MVP Club`,
     description: `${s.intro} Serving Greater Cincinnati.`,
     alternates: { canonical: `${site.url}/services/${s.slug}` },
+    robots: { index: true, follow: true },
   }
 }
 

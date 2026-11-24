@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Services — Heating & Cooling, Plumbing and Electrical in Cincinnati | MVP Club',
   description: 'Furnace and AC repair, water heaters, plumbing, electrical panels and EV chargers across Greater Cincinnati.',
   alternates: { canonical: `${site.url}/services` },
+  robots: { index: true, follow: true },
 }
 
 export default function ServicesIndex() {

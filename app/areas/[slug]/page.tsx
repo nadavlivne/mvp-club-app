@@ -21,6 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `Heating & Cooling, Plumbing and Electrical in ${a.name}, OH | MVP Club`,
     description: `Furnace and AC repair, plumbing and electrical service in ${a.name}, OH — plus MVP Club home check-ups covering all three trades.`,
     alternates: { canonical: `${site.url}/areas/${a.slug}` },
+    robots: { index: true, follow: true },
   }
 }
 
