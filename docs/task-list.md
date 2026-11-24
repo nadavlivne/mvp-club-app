@@ -55,7 +55,8 @@ All wording is in `config/legal.ts`:
 ## To build next
 
 - Tell the office (text or email) when a new lead arrives.
-- A page for each trade and for the main towns (Google searches like "furnace check-up West Chester").
+- Town pages for Northern Kentucky and SE Indiana — only after the partners' licenses there are confirmed (Ohio service and town pages are built: `config/seo-pages.ts`).
+- Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
   - The review should cover spam protection for the website sign-up form (rate limit or a captcha such as Cloudflare Turnstile). Don't use a hidden "trap" field: phone autofill fills it, and real people's leads were dropped.
 - Phase 4: weekly tech bonus, partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).

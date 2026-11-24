@@ -21,6 +21,7 @@ export function SiteLogo() {
 
 const links = [
   { href: '/#checkup', label: 'What we check' },
+  { href: '/services', label: 'Services' },
   { href: '/#membership', label: 'Membership' },
   { href: '/service-area', label: 'Service area' },
   { href: '/#faq', label: 'Questions' },

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import ZipCheck from '@/components/site/ZipCheck'
+import { areaPages } from '@/config/seo-pages'
 import { site } from '@/config/site'
 import { loadServiceArea } from '@/lib/data'
 
@@ -41,6 +42,20 @@ export default function ServiceAreaPage() {
                   <li key={t}>{t}</li>
                 ))}
               </ul>
+              {code === 'OH' && (
+                <div className="mt-4 border-t border-line pt-3">
+                  <div className="text-sm font-semibold">Local pages</div>
+                  <ul className="mt-1 columns-2 gap-4 text-[15px] leading-7">
+                    {areaPages.map((a) => (
+                      <li key={a.slug}>
+                        <Link href={`/areas/${a.slug}`} className="text-link underline">
+                          {a.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           ))}
         </div>
