@@ -22,6 +22,8 @@ export const legal = {
   techJoinTerms: (price: string, firstTermMonths: number) =>
     `I'm joining MVP Club at ${price}. The first term is ${firstTermMonths} months, then month to month. My payment is set up today through MVP Club's secure payment system. [Attorney to confirm wording]`,
 
-  // Website footer.
-  notInsurance: 'MVP Club is a home-service membership, not insurance and not a home warranty. [Attorney to confirm wording]',
+  // Website footer. Says what MVP is (a home-service contractor) and what it is not.
+  // Still to be confirmed by the attorney (tag removed from the live site at Nadav's request).
+  notInsurance:
+    'MVP Club is a home-service membership offered by MVP Home Services LLC, a heating & cooling, plumbing and electrical service contractor. MVP Club is not insurance, not a home warranty and not a property management service.',
 }

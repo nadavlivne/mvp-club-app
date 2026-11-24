@@ -99,7 +99,8 @@ export default async function Home() {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'HomeAndConstructionBusiness',
+    // Tells Google we are a heating & cooling, plumbing and electrical contractor.
+    '@type': ['HVACBusiness', 'Plumber', 'Electrician'],
     name: site.name,
     legalName: site.legalName,
     url: site.url,
