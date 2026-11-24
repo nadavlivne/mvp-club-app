@@ -33,6 +33,9 @@ After the demo: Nadav puts the API key into Vercel as `HOUSECALL_PRO_API_KEY` (n
 
 ## Waiting on Nadav
 
+- License numbers for the trade partners (Galley Electric, Renew Mechanical, plumbing partner) for each state we serve: Ohio, Kentucky, Indiana. They go in `config/trust.ts` and appear in the website footer.
+- Trust facts for the website (`config/trust.ts`): years of experience, licensed / insured confirmed, Google reviews link, team or van photo.
+- MVP's own phone number and address, to replace Yolo's (513-909-9656, 114 E 8th St) in `config/site.ts`.
 - Register with Housecall Pro (MAX plan) and book the demo (questions above).
 - Google Business Profile: business.google.com — MVP Club, (513) 909-9656, 114 E 8th St, Mon–Fri 8–5, joinmvpclub.com.
 - Google Search Console for joinmvpclub.com (after the site is live).

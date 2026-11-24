@@ -350,7 +350,6 @@ export default async function Home() {
               ))}
             </div>
           )}
-          {trust.licenseLines.length > 0 && <p className="mt-4 text-xs text-muted">{trust.licenseLines.join(' · ')}</p>}
         </section>
 
         {/* Price + member benefits */}

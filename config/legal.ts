@@ -26,4 +26,8 @@ export const legal = {
   // Still to be confirmed by the attorney (tag removed from the live site at Nadav's request).
   notInsurance:
     'MVP Club is a home-service membership offered by MVP Home Services LLC, a heating & cooling, plumbing and electrical service contractor. MVP Club is not insurance, not a home warranty and not a property management service.',
+
+  // Website footer, before the list of licensed trade partners (config/trust.ts).
+  // Still to be confirmed by the attorney.
+  licensedWork: 'Work that requires a license or permit is performed by our licensed trade partners:',
 }

@@ -8,8 +8,6 @@ export const trust = {
   licensed: false,
   // Set to true once the insurance certificates are on file.
   insured: false,
-  // Ohio license numbers to show in small print, e.g. 'Ohio electrical license #12345'.
-  licenseLines: [] as string[],
   // Link to the Google Business Profile reviews. Leave '' until the profile is live.
   googleReviewsUrl: '',
   // Real customer reviews only, copied word for word with the customer's OK.
@@ -24,4 +22,14 @@ export const promises: [string, string][] = [
   ['Photos of what we find', 'Every finding comes with a photo, so you see what the tech saw.'],
   ['No pressure', 'Each item has a color for how urgent it is. What can wait, waits — we remind you later.'],
   ['One local team', 'Heating & cooling, plumbing and electrical techs who work in Greater Cincinnati every day.'],
+]
+
+// Licensed trade partners. Any job that needs a license or permit is performed by
+// the partner's licensed company. Shown in small print in the website footer.
+// A partner is shown only once at least one license number is filled in.
+// Add each state's license separately (Ohio, Kentucky, Indiana) — we serve all three.
+export const tradePartners: { company: string; trade: string; licenses: string[] }[] = [
+  { company: 'Galley Electric', trade: 'Electrical', licenses: [] }, // e.g. 'Ohio OCILB electrical #00000'
+  { company: 'Renew Mechanical', trade: 'Heating & cooling', licenses: [] }, // e.g. 'Ohio OCILB HVAC #00000'
+  // Plumbing partner: add once confirmed.
 ]
