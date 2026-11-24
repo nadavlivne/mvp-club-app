@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import ZipCheck from '@/components/site/ZipCheck'
-import { membership, ratings, replacementCredits, serviceCallCode, type Rating } from '@/config/business'
+import { membership, ratings, replacementCreditExamples, replacementCredits, serviceCallCode, type Rating } from '@/config/business'
+import { promises, trust } from '@/config/trust'
 import { site } from '@/config/site'
 import { loadCatalogLive, loadServiceArea } from '@/lib/data'
 import { money } from '@/lib/pricing'
@@ -68,7 +69,7 @@ const faqs: [string, string][] = [
   ],
   [
     'What are replacement credits?',
-    `When a member replaces equipment with us — like a water heater, furnace or AC — they get a credit off the price. Credits start after ${membership.creditWaitDays} days of membership.`,
+    `When a member replaces equipment with us, they get a credit off the price. $${replacementCredits.Small}: ${replacementCreditExamples.Small}. $${replacementCredits.Medium}: ${replacementCreditExamples.Medium}. $${replacementCredits.Large}: ${replacementCreditExamples.Large}. Credits start after ${membership.creditWaitDays} days of membership.`,
   ],
   [
     'When does my membership start?',
@@ -304,6 +305,53 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Why trust us — facts come from config/trust.ts; empty ones are hidden */}
+        <section id="trust" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-12">
+          <h2 className="font-display text-[32px] leading-tight font-bold">New name. Experienced hands.</h2>
+          <p className="mt-2 max-w-2xl text-body">
+            MVP Club brings together established local heating &amp; cooling, plumbing and electrical pros under one membership
+            {trust.yearsExperience ? ` — with ${trust.yearsExperience}+ years of experience between them` : ''}.
+          </p>
+          {(trust.licensed || trust.insured || trust.googleReviewsUrl) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {trust.licensed && <span className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold ring-1 ring-line">✓ Licensed</span>}
+              {trust.insured && <span className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold ring-1 ring-line">✓ Insured</span>}
+              {trust.googleReviewsUrl && (
+                <a href={trust.googleReviewsUrl} className="rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-link underline ring-1 ring-line">
+                  Read our Google reviews
+                </a>
+              )}
+            </div>
+          )}
+          <div className={`mt-6 grid gap-6 ${trust.teamPhoto ? 'md:grid-cols-[1fr_320px]' : ''}`}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {promises.map(([title, text]) => (
+                <div key={title} className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-line">
+                  <h3 className="font-display text-xl font-bold">{title}</h3>
+                  <p className="mt-1 text-[15px] text-body">{text}</p>
+                </div>
+              ))}
+            </div>
+            {trust.teamPhoto && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={trust.teamPhoto} alt="The MVP Club team" className="h-full w-full rounded-xl object-cover" />
+            )}
+          </div>
+          {trust.reviews.length > 0 && (
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {trust.reviews.map((r) => (
+                <figure key={r.name + r.text} className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-line">
+                  <blockquote className="text-[15px] text-body">“{r.text}”</blockquote>
+                  <figcaption className="mt-2 text-sm font-semibold">
+                    {r.name} · {r.town}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+          {trust.licenseLines.length > 0 && <p className="mt-4 text-xs text-muted">{trust.licenseLines.join(' · ')}</p>}
+        </section>
+
         {/* Price + member benefits */}
         <section id="membership" className="mx-auto max-w-5xl scroll-mt-20 px-4 py-12">
           <h2 className="font-display text-[32px] leading-tight font-bold">Membership</h2>
@@ -364,7 +412,18 @@ export default async function Home() {
                   </tr>
                 </tbody>
               </table>
-              <p className="mt-3 text-xs text-muted">Replacement credits apply after {membership.creditWaitDays} days of membership.</p>
+              <div className="mt-4 rounded-lg bg-page p-4">
+                <div className="text-sm font-semibold">Replacement credits</div>
+                <ul className="mt-2 flex flex-col gap-1.5 text-sm text-body">
+                  {(['Small', 'Medium', 'Large'] as const).map((tier) => (
+                    <li key={tier} className="flex gap-3">
+                      <span className="w-12 shrink-0 font-bold text-success">${replacementCredits[tier]}</span>
+                      <span>{replacementCreditExamples[tier]}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted">Credits apply after {membership.creditWaitDays} days of membership.</p>
+              </div>
             </div>
           </div>
         </section>
