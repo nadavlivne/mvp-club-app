@@ -99,3 +99,17 @@ export const techBonus = {
   aboveRate: 0.1, // 10% of every dollar above the target
   perItemSold: 25, // every check-up report item sold, credited to the tech who found it
 }
+
+// "Nearby check-up" tool: when a job is booked, offer the trip to members close by who are due.
+export const nearbyCheckup = {
+  // How far from the booked job (miles, zip code to zip code) to look for members.
+  radiusMiles: 3,
+  // A member is due when the last check-up was more than this many days ago (or never).
+  // Two check-ups a year, so about 5 months.
+  dueAfterDays: 150,
+  // Don't offer the same member a nearby slot again within this many days.
+  reofferAfterDays: 14,
+}
+
+// Spring = AC focus, fall = furnace focus (used in the wording of the offer).
+export const checkupSeasonFor = (date: Date) => (date.getMonth() >= 6 ? 'fall' : 'spring')

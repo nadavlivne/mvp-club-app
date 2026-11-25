@@ -61,6 +61,9 @@ All wording is in `config/legal.ts`:
 - Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
 - Phase 4: partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).
+- Nearby check-ups: built (/office/nearby). Pick a booked job, see members within 3 miles who are due (no check-up in 150 days), send a ready-made text. Run `supabase/migrations/20261125020000_nearby_offers.sql` once.
+  - For now members = leads marked "Joined", and check-up history = our own check-up visits matched by street address. Phase 3: members, jobs and history from Housecall Pro, and texts sent through Housecall Pro.
+  - To confirm with Nadav: 3-mile radius, "due" after 150 days, wait 14 days before offering the same member again (all in `config/business.ts`).
 - Weekly tech bonus: built (/office/bonuses for admin, "My bonus" in the tech app). Revenue is typed in from Housecall Pro each week until paid-job webhooks fill it in (phase 3). Run `supabase/migrations/20261125010000_tech_bonus.sql` once.
   - To confirm with Nadav: a report item counts as "sold" when the customer approves it (not when it's paid), credited to the van of the tech who did the check-up.
 
