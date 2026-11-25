@@ -33,6 +33,9 @@ After the demo: Nadav puts the API key into Vercel as `HOUSECALL_PRO_API_KEY` (n
 
 ## Waiting on Nadav
 
+- Lead alerts by email: make a free account at resend.com, verify joinmvpclub.com there (it gives DNS records to add in Porkbun), then add in Vercel: `RESEND_API_KEY`, `OFFICE_ALERT_EMAIL` (one or more emails, comma-separated) and optionally `ALERT_FROM_EMAIL`. Until then no emails go out; leads still show in /office/leads.
+- Sign-up bot check: in Cloudflare → Turnstile, add a widget for joinmvpclub.com, then add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in Vercel. Until then only the per-connection limit protects the form.
+- Run `supabase/migrations/20261125000000_lead_guard.sql` in Supabase (turns on the limit of 5 new sign-ups per connection per hour).
 - License numbers for the trade partners (Galley Electric, Renew Mechanical, plumbing partner) for each state we serve: Ohio, Kentucky, Indiana. They go in `config/trust.ts` and appear in the website footer.
 - Trust facts for the website (`config/trust.ts`): years of experience, licensed / insured confirmed, Google reviews link, team or van photo.
 - MVP's own phone number and address, to replace Yolo's (513-909-9656, 114 E 8th St) in `config/site.ts`.
@@ -54,11 +57,9 @@ All wording is in `config/legal.ts`:
 
 ## To build next
 
-- Tell the office (text or email) when a new lead arrives.
 - Town pages for Northern Kentucky and SE Indiana — only after the partners' licenses there are confirmed (Ohio service and town pages are built: `config/seo-pages.ts`).
 - Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
-  - The review should cover spam protection for the website sign-up form (rate limit or a captcha such as Cloudflare Turnstile). Don't use a hidden "trap" field: phone autofill fills it, and real people's leads were dropped.
 - Phase 4: weekly tech bonus, partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).
 
 ## Ideas not adopted (need Nadav's OK first)

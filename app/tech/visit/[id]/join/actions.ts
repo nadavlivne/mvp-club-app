@@ -5,6 +5,9 @@ import { legal } from '@/config/legal'
 import { checkJoin, joinRow, SAVE_ERROR, validSignature, type JoinData, type JoinResult } from '@/lib/join'
 import { money } from '@/lib/pricing'
 import { adminClient, userClient } from '@/lib/supabase/server'
+import { after } from 'next/server'
+import { notifyOffice } from '@/lib/notify'
+import { site } from '@/config/site'
 
 // Sign-up on the tech's tablet during a visit: one screen, signed on the spot.
 // The card is taken in the Housecall Pro app; the office confirms and marks the lead "Joined".
@@ -44,5 +47,15 @@ export async function techJoin(visitId: string, data: JoinData, signature: strin
     console.error('tech join failed', error)
     return { ok: false, error: SAVE_ERROR }
   }
+  after(() =>
+    notifyOffice(`Signed up on a visit: ${data.firstName} ${data.lastName}`, [
+      `${data.firstName} ${data.lastName} joined MVP Club on the tech's tablet.`,
+      `Plan: ${money(price)}/${data.plan === 'monthly' ? 'month' : 'year'}`,
+      `Phone: ${data.phone}`,
+      '',
+      'Next: confirm the card in Housecall Pro and mark the lead "Joined".',
+      `${site.url}/office/leads`,
+    ]),
+  )
   return { ok: true }
 }
