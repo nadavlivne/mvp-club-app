@@ -99,16 +99,24 @@ export async function loadReminders() {
   }
   // A group counts as done only when every item in it was handled.
   for (const g of groups.values()) if (g.items.some((i) => !doneMap.has(`${g.linkId}|${i.key}|${i.stage}`))) g.done = null
-  const all = [...groups.values()].sort((a, b) => a.due.localeCompare(b.due))
+  // When a later reminder for the same item is already due, the earlier unsent one is dropped (one text, not two).
+  const today = todayET()
+  const laterDue = new Set<string>()
+  for (const g of groups.values()) if (g.due <= today) for (const i of g.items) if (i.stage > 0) laterDue.add(`${g.linkId}|${i.key}`)
+  for (const g of groups.values()) {
+    if (g.done) continue
+    g.items = g.items.filter((i) => !(i.stage === 0 && laterDue.has(`${g.linkId}|${i.key}`) && !doneMap.has(`${g.linkId}|${i.key}|0`)))
+  }
+  const all = [...groups.values()].filter((g) => g.items.length).sort((a, b) => a.due.localeCompare(b.due))
   return { all, setupMissing: !!done.error }
 }
 
 export function reminderText(r: Reminder) {
-  const list = r.items.map((i) => i.title.toLowerCase()).join(', ')
-  const when = r.items.some((i) => i.rating === 'ORANGE') ? 'within 6 months' : 'within the year'
+  const list = r.items.map((i) => i.title.charAt(0).toLowerCase() + i.title.slice(1)).join('; ')
+  const when = r.items.some((i) => i.rating === 'ORANGE') ? 'within 6 months' : 'before your next check-up'
   return (
-    `Hi ${r.firstName || 'there'}, it's MVP Club. A friendly reminder from your check-up: we recommended ${list} ${when}. ` +
-    `Want us to take care of it? Reply YES and we'll find a time that works. Your report: ${site.url}/r/${r.token}`
+    `Hi ${r.firstName || 'there'}, it's MVP Club with a friendly reminder. At your check-up we found: ${list}. ` +
+    `We recommend taking care of it ${when}. Want us to schedule it? Reply YES. Your report: ${site.url}/r/${r.token}`
   )
 }
 
