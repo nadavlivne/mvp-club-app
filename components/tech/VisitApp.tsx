@@ -450,6 +450,12 @@ function TradeChecklist({
       <div className="h-2 overflow-hidden rounded-full bg-line">
         <div className="h-full rounded-full" style={{ width: `${(100 * p.done) / p.total}%`, background: tradeInfo[trade].color }} />
       </div>
+      {areas.some((a) => a.rows.some((r) => r.whoCanCheck === 'Trade tech')) && (
+        <div className="text-sm text-body">
+          <span className="rounded-full bg-page px-2 py-0.5 text-xs font-bold text-muted">Trade tech</span> = only the licensed {tradeLabel(trade).toLowerCase()}{' '}
+          tech checks this area.
+        </div>
+      )}
 
       {areas.map((a) => {
         const state = work.areas[a.key] ?? { ok: false, findings: [] }

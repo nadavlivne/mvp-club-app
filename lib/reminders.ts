@@ -116,7 +116,7 @@ export function reminderText(r: Reminder) {
   const when = r.items.some((i) => i.rating === 'ORANGE') ? 'within 6 months' : 'before your next check-up'
   return (
     `Hi ${r.firstName || 'there'}, it's MVP Club with a friendly reminder. At your check-up we found: ${list}. ` +
-    `We recommend taking care of it ${when}. Want us to schedule it? Reply YES. Your report: ${site.url}/r/${r.token}`
+    `We recommend taking care of it ${when}. Reply YES and we'll schedule it, or approve it yourself here: ${site.url}/r/${r.token}`
   )
 }
 

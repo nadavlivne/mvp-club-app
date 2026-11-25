@@ -16,7 +16,15 @@ export default async function CustomerLinkPage({ params }: { params: Promise<{ t
   const db = adminClient()
   const { data: link } = await db.from('customer_links').select('id, kind, view').eq('token', token).maybeSingle()
   if (!link) notFound()
-  const { data: approval } = await db.from('approvals').select('created_at, details').eq('link_id', link.id).maybeSingle()
+  // A check-up report can be approved more than once (items saved for later, approved from a reminder).
+  const { data: approvals } = await db
+    .from('approvals')
+    .select('created_at, details')
+    .eq('link_id', link.id)
+    .order('created_at', { ascending: true })
+    .returns<{ created_at: string; details: Record<string, unknown> }[]>()
+  const approval = approvals?.at(-1) ?? null
+  const approvedKeys = (approvals ?? []).flatMap((a) => ((a.details.items as { key: string }[] | undefined) ?? []).map((i) => i.key))
 
   // Stored photos are private: give the customer short-lived links to their own photos only.
   const sign = async (ref?: string) => {
@@ -29,7 +37,7 @@ export default async function CustomerLinkPage({ params }: { params: Promise<{ t
   if (link.kind === 'report') {
     const view = link.view as ReportView
     const items = await Promise.all(view.items.map(async (i) => ({ ...i, photo: await sign(i.photo) })))
-    return <CheckupReport report={{ ...view, items }} token={token} approved={approved} />
+    return <CheckupReport report={{ ...view, items }} token={token} approved={approved} approvedKeys={approvedKeys} />
   }
   const view = link.view as EstimateView
   return <ServiceEstimate estimate={{ ...view, found: { ...view.found, photo: await sign(view.found.photo) } }} token={token} approved={approved} />

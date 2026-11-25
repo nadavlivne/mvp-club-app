@@ -14,15 +14,28 @@ import { ApproveButton, BottomBar, Card, DoneCard, Header, LineItems, LinkButton
 type Screen = 'report' | 'approve' | 'done'
 
 // RED items that have a price come pre-added to the cart.
-const startCart = (items: ReportItem[]) =>
-  Object.fromEntries(items.filter((i) => i.rating === 'RED' && i.price !== null).map((i) => [i.key, true]))
+const startCart = (items: ReportItem[], approved: string[] = []) =>
+  Object.fromEntries(items.filter((i) => i.rating === 'RED' && i.price !== null && !approved.includes(i.key)).map((i) => [i.key, true]))
 
 export type Approved = { at: string; details: Record<string, unknown> } | null
 
 // `token` is set on a real customer link (approvals are saved); without it this is the sample.
-export default function CheckupReport({ report, token, approved = null }: { report: ReportView; token?: string; approved?: Approved }) {
+export default function CheckupReport({
+  report,
+  token,
+  approved = null,
+  approvedKeys = [],
+}: {
+  report: ReportView
+  token?: string
+  approved?: Approved
+  approvedKeys?: string[] // items approved earlier on this link
+}) {
   const [screen, setScreen] = useState<Screen>(approved ? 'done' : 'report')
-  const [added, setAdded] = useState<Record<string, boolean>>(() => startCart(report.items))
+  const [doneKeys, setDoneKeys] = useState<string[]>(approvedKeys)
+  const [justApproved, setJustApproved] = useState(false) // approved in this visit to the page
+  const [lastCart, setLastCart] = useState<ReportItem[]>([])
+  const [added, setAdded] = useState<Record<string, boolean>>(() => startCart(report.items, approvedKeys))
   const [remind, setRemind] = useState<Record<string, boolean>>({})
   const [day, setDay] = useState<VisitDay | null>(null)
   const [slot, setSlot] = useState(visitSlots[0].id)
@@ -59,6 +72,9 @@ export default function CheckupReport({ report, token, approved = null }: { repo
       if ('error' in r) setError(r.error)
       else {
         setSignature(null)
+        setLastCart(cart)
+        setDoneKeys((d) => [...d, ...cart.map((c) => c.key)])
+        setJustApproved(true)
         setScreen('done')
         window.scrollTo(0, 0)
       }
@@ -75,7 +91,9 @@ export default function CheckupReport({ report, token, approved = null }: { repo
     .sort((a, b) => (a.rating === b.rating ? 0 : a.rating === 'ORANGE' ? -1 : 1))
   const watchList = report.items.filter((i) => i.rating === 'GREEN')
 
-  const cart = report.items.filter((i) => added[i.key] && i.price !== null)
+  const cart = report.items.filter((i) => added[i.key] && i.price !== null && !doneKeys.includes(i.key))
+  // Priced items not approved yet: the customer can come back (for example from a reminder) and add them.
+  const stillOpen = report.items.filter((i) => i.price !== null && i.rating !== 'GREEN' && !doneKeys.includes(i.key))
   const total = cart.reduce((a, i) => a + (i.price ?? 0), 0)
   const save = cart.reduce((a, i) => a + ((i.standard ?? 0) - (i.price ?? 0)), 0)
   const saveLine = save > 0 ? `You save ${money(save)} as a member` : ''
@@ -103,6 +121,7 @@ export default function CheckupReport({ report, token, approved = null }: { repo
               key={item.key}
               item={item}
               on={!!added[item.key]}
+              done={doneKeys.includes(item.key)}
               onAdd={() => setAdded({ ...added, [item.key]: !added[item.key] })}
             />
           ))}
@@ -113,6 +132,7 @@ export default function CheckupReport({ report, token, approved = null }: { repo
               key={item.key}
               item={item}
               on={!!added[item.key]}
+              done={doneKeys.includes(item.key)}
               onAdd={() => setAdded({ ...added, [item.key]: !added[item.key] })}
               reminded={!!remind[item.key]}
               onRemind={() => setRemind({ ...remind, [item.key]: !remind[item.key] })}
@@ -134,7 +154,7 @@ export default function CheckupReport({ report, token, approved = null }: { repo
             <div className="text-base font-bold">Checked and OK ({report.checkedOk.length})</div>
             <div className="text-sm leading-normal text-body">{report.checkedOk.join(' · ')}</div>
           </Card>
-          <div className="text-center text-xs text-muted">Sample home · items and prices from the MVP Inspection Guide and price book</div>
+          {!token && <div className="text-center text-xs text-muted">Sample home · items and prices from the MVP Inspection Guide and price book</div>}
 
           {cart.length > 0 && (
             <BottomBar>
@@ -196,7 +216,7 @@ export default function CheckupReport({ report, token, approved = null }: { repo
           <Card className="flex flex-col gap-2.5">
             <StepTitle n={3}>Sign to approve</StepTitle>
             <SignaturePad onChange={setSignature} />
-            <div className="text-xs leading-[1.45] text-muted">{legal.checkupApproval}</div>
+            <div className="text-sm leading-[1.45] text-body">{legal.checkupApproval}</div>
           </Card>
           {error && <Card className="border-2 border-alert text-sm font-semibold text-alert">{error}</Card>}
           <ApproveButton
@@ -218,7 +238,7 @@ export default function CheckupReport({ report, token, approved = null }: { repo
 
       {screen === 'done' && (
         <main className="mx-auto flex max-w-xl flex-col gap-3.5 px-4 py-6">
-          {approved ? (
+          {approved && !justApproved ? (
             <DoneCard
               line={`Approved on ${new Date(approved.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}. We will text you to confirm ${String(approved.details.dayLabel ?? '')} ${visitSlots.find((s) => s.id === approved.details.slot)?.short ?? ''}.`}
             />
@@ -229,11 +249,24 @@ export default function CheckupReport({ report, token, approved = null }: { repo
           )}
           <LineItems
             lines={
-              approved
+              approved && !justApproved
                 ? ((approved.details.items as { title: string; price: number }[]) ?? []).map((i) => ({ label: i.title, amount: i.price }))
-                : cart.map((c) => ({ label: c.title, amount: c.price ?? 0 }))
+                : (justApproved ? lastCart : cart).map((c) => ({ label: c.title, amount: c.price ?? 0 }))
             }
           />
+          {token && stillOpen.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setAdded({})
+                setDay(null)
+                go('report')
+              }}
+              className="h-12 rounded-[10px] border-2 border-navy bg-white text-base font-bold text-navy"
+            >
+              Ready for more? Add the items you saved ({stillOpen.length})
+            </button>
+          )}
           <div className="text-center text-sm leading-[1.45] text-muted">
             We&apos;ll remind you about the items you saved for later. Questions? Call {company.phone}.
           </div>
@@ -281,12 +314,14 @@ function Stat({ n, label, color }: { n: number; label: string; color: string }) 
 function ItemCard({
   item,
   on,
+  done = false,
   onAdd,
   reminded,
   onRemind,
 }: {
   item: ReportItem
   on: boolean
+  done?: boolean // approved earlier
   onAdd: () => void
   reminded?: boolean
   onRemind?: () => void
@@ -321,6 +356,9 @@ function ItemCard({
               </div>
             </div>
           )}
+          {done ? (
+            <span className="shrink-0 rounded-[10px] bg-success-bg px-3 py-2.5 text-sm font-bold text-success">✓ Approved</span>
+          ) : (
           <div className="flex shrink-0 gap-2">
             {onRemind && (
               <button
@@ -342,6 +380,7 @@ function ItemCard({
               </button>
             )}
           </div>
+          )}
         </div>
       </div>
     </div>

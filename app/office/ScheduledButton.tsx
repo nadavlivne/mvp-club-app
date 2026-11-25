@@ -19,9 +19,9 @@ export default function ScheduledButton({ id, scheduled }: { id: string; schedul
       type="button"
       disabled={pending}
       onClick={() => start(() => setScheduled(id, true))}
-      className="h-11 rounded-[10px] bg-success px-4 text-[15px] font-bold text-white"
+      className="h-11 rounded-[10px] bg-navy px-4 text-[15px] font-bold text-white"
     >
-      {pending ? 'Saving…' : 'Scheduled in Housecall Pro ✓'}
+      {pending ? 'Saving…' : 'Mark as scheduled in Housecall Pro'}
     </button>
   )
 }

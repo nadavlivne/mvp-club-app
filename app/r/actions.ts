@@ -18,8 +18,12 @@ export async function submitApproval(token: string, choice: ReportChoice | Estim
   const db = adminClient()
   const { data: link } = await db.from('customer_links').select('id, kind, view').eq('token', token).maybeSingle()
   if (!link || link.kind !== choice.kind) return { error: 'This link is not valid any more. Please call us.' }
-  const { count } = await db.from('approvals').select('id', { count: 'exact', head: true }).eq('link_id', link.id)
-  if (count) return { error: 'This was already approved. Thank you!' }
+  const { data: earlier } = await db.from('approvals').select('details').eq('link_id', link.id).returns<{ details: Record<string, unknown> }[]>()
+  // An estimate is approved once. A check-up report can be approved again for items not approved yet
+  // (the ones the customer saved for later).
+  if (earlier?.length && choice.kind === 'estimate') return { error: 'This was already approved. Thank you!' }
+  const alreadyApproved = new Set((earlier ?? []).flatMap((a) => ((a.details.items as { key: string }[] | undefined) ?? []).map((i) => i.key)))
+  if (choice.kind === 'report' && choice.keys.some((k) => alreadyApproved.has(k))) return { error: 'Some of these items were already approved. Please refresh the page.' }
 
   let details: Record<string, unknown>
   let legalText: string

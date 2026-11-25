@@ -33,6 +33,8 @@ After the demo: Nadav puts the API key into Vercel as `HOUSECALL_PRO_API_KEY` (n
 
 ## Waiting on Nadav
 
+- Price sheet sharing (decided Nov 25: each trade edits its own tabs): share the Google Sheet with each partner as Editor, then Data → Protect sheets and ranges so each one can only change his own price tab and Check-up tab.
+- If the Check-up tabs are linked in the Google Sheet: change who_can_check to "Any trained tech" on HI-06, HI-10 and HI-11 there too (decided Nov 25: one trained tech does the whole check-up; done in data/inspection_guide.csv).
 - Lead alerts by email: make a free account at resend.com, verify joinmvpclub.com there (it gives DNS records to add in Porkbun), then add in Vercel: `RESEND_API_KEY`, `OFFICE_ALERT_EMAIL` (one or more emails, comma-separated) and optionally `ALERT_FROM_EMAIL`. Until then no emails go out; leads still show in /office/leads.
 - Sign-up bot check: in Cloudflare → Turnstile, add a widget for joinmvpclub.com, then add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in Vercel. Until then only the per-connection limit protects the form.
 - Run `supabase/migrations/20261125000000_lead_guard.sql` in Supabase (turns on the limit of 5 new sign-ups per connection per hour).
@@ -57,6 +59,8 @@ All wording is in `config/legal.ts`:
 
 ## To build next
 
+- Partner view: a per-trade P&L screen partners can open themselves (needs paid jobs from Housecall Pro, phase 3).
+
 - Town pages for Northern Kentucky and SE Indiana — only after the partners' licenses there are confirmed (Ohio service and town pages are built: `config/seo-pages.ts`).
 - Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
@@ -68,9 +72,10 @@ All wording is in `config/legal.ts`:
   - For now members = leads marked "Joined", and check-up history = our own check-up visits matched by street address. Phase 3: members, jobs and history from Housecall Pro, and texts sent through Housecall Pro.
   - To confirm with Nadav: 3-mile radius, "due" after 150 days, wait 14 days before offering the same member again (all in `config/business.ts`).
 - Weekly tech bonus: built (/office/bonuses for admin, "My bonus" in the tech app). Revenue is typed in from Housecall Pro each week until paid-job webhooks fill it in (phase 3). Run `supabase/migrations/20261125010000_tech_bonus.sql` once.
-  - To confirm with Nadav: a report item counts as "sold" when the customer approves it (not when it's paid), credited to the van of the tech who did the check-up.
+  - Decided (Nov 25): the $25 per report item counts in the week the customer PAYS, credited to the van of the tech who did the check-up. Until Housecall Pro is connected the office taps "Mark as paid" on the job (Approved jobs → Scheduled). Run `supabase/migrations/20261125040000_paid_jobs.sql` once.
 
 ## Ideas not adopted (need Nadav's OK first)
+
 
 - Priority scheduling for members.
 - Free service call for members (now $19).

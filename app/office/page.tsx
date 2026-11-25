@@ -4,6 +4,7 @@ import { Card } from '@/components/ui'
 import { money } from '@/lib/pricing'
 import { adminClient } from '@/lib/supabase/server'
 import { dateET, requireStaff, weekStartET } from '@/lib/staff'
+import PaidButton from './PaidButton'
 import ScheduledButton from './ScheduledButton'
 
 type Row = {
@@ -12,6 +13,7 @@ type Row = {
   details: Record<string, unknown>
   signature: string
   scheduled_at: string | null
+  paid_at?: string | null
   customer_links: {
     kind: 'report' | 'estimate'
     token: string
@@ -40,14 +42,16 @@ export default async function ApprovedJobs({ searchParams }: { searchParams: Pro
   const { van = 'all', show = 'ready' } = await searchParams
 
   const since = new Date(Date.now() - 60 * 86_400_000).toISOString()
-  const { data } = await adminClient()
-    .from('approvals')
-    .select(
-      'id, created_at, details, signature, scheduled_at, customer_links!inner(kind, token, visits!inner(address, kind, trade, customer, techs(name, van)))',
-    )
-    .gte('created_at', since)
-    .order('created_at', { ascending: false })
-    .returns<Row[]>()
+  const load = (cols: string) =>
+    adminClient()
+      .from('approvals')
+      .select(`${cols}, customer_links!inner(kind, token, visits!inner(address, kind, trade, customer, techs(name, van)))`)
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .returns<Row[]>()
+  // paid_at comes with the 20261125040000_paid_jobs setup file; until it's run the page works without it.
+  let { data, error } = await load('id, created_at, details, signature, scheduled_at, paid_at')
+  if (error) ({ data } = await load('id, created_at, details, signature, scheduled_at'))
   const rows = data ?? []
   const vanOf = (r: Row) => r.customer_links.visits.techs?.van || 'No van'
   const vans = [...new Set(rows.map(vanOf))].sort()
@@ -191,6 +195,12 @@ export default async function ApprovedJobs({ searchParams }: { searchParams: Pro
                         Scheduled {fmt(r.scheduled_at)}
                       </>
                     )}
+                    {r.paid_at && (
+                      <>
+                        <br />
+                        Paid {fmt(r.paid_at)}
+                      </>
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -202,6 +212,7 @@ export default async function ApprovedJobs({ searchParams }: { searchParams: Pro
                   >
                     Customer page
                   </a>
+                  {r.scheduled_at && r.paid_at !== undefined && <PaidButton id={r.id} paid={!!r.paid_at} />}
                   <ScheduledButton id={r.id} scheduled={!!r.scheduled_at} />
                 </div>
               </div>
