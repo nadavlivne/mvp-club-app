@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import SignaturePad from '@/components/SignaturePad'
+import Turnstile from '@/components/site/Turnstile'
 import { finishJoin, saveJoinStep } from '@/app/join/actions'
 import type { JoinData } from '@/lib/join'
 import { membership, membershipPrice } from '@/config/business'
@@ -31,6 +32,7 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
   const [inArea, setInArea] = useState<boolean | undefined>()
   const [signature, setSignature] = useState<string | null>(null)
   const [agreed, setAgreed] = useState(false)
+  const [humanCheck, setHumanCheck] = useState('')
   const [pending, start] = useTransition()
   const [d, setD] = useState<JoinData>({
     firstName: '',
@@ -51,7 +53,7 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
   const next = () => {
     setError(null)
     start(async () => {
-      const r = await saveJoinStep(step + 1, d)
+      const r = await saveJoinStep(step + 1, d, humanCheck)
       if (!r.ok) return setError(r.error)
       if (r.inArea !== undefined) setInArea(r.inArea)
       setStep((s) => s + 1)
@@ -129,6 +131,7 @@ export default function JoinForm({ initialPlan, memberCall }: { initialPlan: 'mo
             <Field label="Email (optional)">
               <input className={input} type="email" autoComplete="email" value={d.email} onChange={(e) => set('email', e.target.value)} />
             </Field>
+            <Turnstile onToken={setHumanCheck} />
           </>
         )}
 

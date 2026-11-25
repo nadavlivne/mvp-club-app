@@ -82,3 +82,9 @@ export function membershipPrice(plan: 'monthly' | 'yearly', systems: number) {
   const extra = Math.max(0, systems - 1)
   return plan === 'monthly' ? membership.monthly + extra * membership.extraSystemMonthly : membership.yearly + extra * membership.extraSystemYearly
 }
+
+// Website sign-up protection: most new sign-ups from one internet connection per hour.
+// A family or an office sharing Wi-Fi rarely needs more than this.
+export const spamGuard = {
+  newLeadsPerHourPerConnection: 5,
+}
