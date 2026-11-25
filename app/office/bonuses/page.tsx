@@ -31,7 +31,7 @@ export default async function BonusesPage({ searchParams }: { searchParams: Prom
 
       {setupMissing && (
         <Card className="text-[15px] text-body">
-          To save revenue, run <code>supabase/migrations/20261125010000_tech_bonus.sql</code> in Supabase → SQL Editor once.
+          To save revenue, run <code>supabase/migrations/20261125010000_tech_bonus.sql</code> and <code>20261125040000_paid_jobs.sql</code> in Supabase → SQL Editor once.
         </Card>
       )}
 
@@ -81,7 +81,7 @@ export default async function BonusesPage({ searchParams }: { searchParams: Prom
             <BonusLines b={v.bonus} revenueEntered={v.revenueEntered} />
             {v.items.length > 0 && (
               <details className="text-sm">
-                <summary className="cursor-pointer font-semibold text-link">Report items sold ({v.items.length})</summary>
+                <summary className="cursor-pointer font-semibold text-link">Report items paid ({v.items.length})</summary>
                 <ul className="mt-1.5 flex flex-col gap-1">
                   {v.items.map((i, n) => (
                     <li key={n} className="text-body">
@@ -97,7 +97,7 @@ export default async function BonusesPage({ searchParams }: { searchParams: Prom
       </div>
 
       <p className="text-xs text-muted">
-        A report item counts as sold when the customer approves it on their report page. When Housecall Pro is connected, paid revenue will fill in by itself.
+        A report item counts in the week the customer pays for the job (the office taps Mark as paid on Approved jobs). When Housecall Pro is connected, paid jobs and revenue will fill in by themselves.
       </p>
     </main>
   )

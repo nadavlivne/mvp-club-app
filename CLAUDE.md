@@ -42,7 +42,7 @@ Brand:
 - Every recommendation must match a row in `data/inspection_guide.csv`; techs pick items from `data/pricebook.csv` and **cannot type or change prices**.
 - A RED item cannot be sent without a photo. A check-up cannot be closed until all three trades are done.
 - **Legal (placeholder until the attorney signs off):** work approved in the home gets Ohio's 3-business-day right to cancel. The approve screen shows the notice and the signed copy is emailed. Emergency same-visit repairs use waiver wording. Keep these texts in one config file so the attorney's wording drops in.
-- **Tech bonus (per van, per week):** 5% of revenue from $6,700 to $7,500, +$100 at $7,500 or more, 10% of every dollar above $7,500, +$25 for every report item sold (credited to the tech who found it). Revenue = paid jobs before sales tax; membership fees don't count.
+- **Tech bonus (per van, per week):** 5% of revenue from $6,700 to $7,500, +$100 at $7,500 or more, 10% of every dollar above $7,500, +$25 for every report item sold, counted when the customer pays for it (credited to the tech who found it). Revenue = paid jobs before sales tax; membership fees don't count.
 - **Partner scorecard (quarterly):** callbacks, Google reviews, on-time check-ups, report items sold (weights still to be agreed).
 
 ## Data files

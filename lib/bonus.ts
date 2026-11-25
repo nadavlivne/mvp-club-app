@@ -32,7 +32,7 @@ export const payday = (monday: string) =>
   new Date(addDays(monday, 11) + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
 type ApprovalRow = {
-  created_at: string
+  paid_at: string
   details: { items?: { title: string }[] }
   customer_links: { kind: string; visits: { customer: { name: string }; techs: { name: string; van: string } | null } }
 }
@@ -47,19 +47,20 @@ export async function bonusWeek(monday: string, onlyVan?: string): Promise<{ van
   const [techs, revenue, approvals] = await Promise.all([
     db.from('techs').select('name, van, active').returns<{ name: string; van: string; active: boolean }[]>(),
     db.from('van_week_revenue').select('van, revenue, note, entered_by').eq('week_start', monday).returns<{ van: string; revenue: number; note: string; entered_by: string }[]>(),
+    // Report items count in the week the customer PAID for the job (not when they approved it).
     db
       .from('approvals')
-      .select('created_at, details, customer_links!inner(kind, visits!inner(customer, techs(name, van)))')
+      .select('paid_at, details, customer_links!inner(kind, visits!inner(customer, techs(name, van)))')
       .eq('customer_links.kind', 'report')
-      .gte('created_at', from)
-      .lt('created_at', to)
+      .gte('paid_at', from)
+      .lt('paid_at', to)
       .returns<ApprovalRow[]>(),
   ])
 
-  // Report items sold this week, credited to the van of the tech who did the check-up.
+  // Report items paid this week, credited to the van of the tech who did the check-up.
   const sold = new Map<string, VanWeek['items']>()
   for (const a of approvals.data ?? []) {
-    const day = dateET(a.created_at)
+    const day = dateET(a.paid_at)
     if (day < monday || day > sunday) continue
     const v = a.customer_links.visits
     const van = v.techs?.van || 'No van'
@@ -87,5 +88,5 @@ export async function bonusWeek(monday: string, onlyVan?: string): Promise<{ van
       items,
     }
   })
-  return { vans, setupMissing: !!revenue.error }
+  return { vans, setupMissing: !!revenue.error || !!approvals.error }
 }

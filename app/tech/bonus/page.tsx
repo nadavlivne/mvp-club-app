@@ -51,7 +51,7 @@ export default async function TechBonusPage() {
           </Card>
         ))}
         <p className="text-xs text-muted">
-          Revenue is paid jobs before sales tax (membership fees don&apos;t count). Until it&apos;s automatic, the office enters it from Housecall Pro, so this
+          Revenue is paid jobs before sales tax (membership fees don&apos;t count). Report items count once the customer has paid for them. Until it&apos;s automatic, the office enters it from Housecall Pro, so this
           week&apos;s number can lag.
         </p>
       </main>

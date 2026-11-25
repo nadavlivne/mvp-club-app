@@ -97,7 +97,7 @@ export const techBonus = {
   target: 7500, // ...up to here; reaching it pays a flat bonus
   targetBonus: 100,
   aboveRate: 0.1, // 10% of every dollar above the target
-  perItemSold: 25, // every check-up report item sold, credited to the tech who found it
+  perItemSold: 25, // every check-up report item the customer has PAID for, credited to the tech who found it (confirmed by Nadav)
 }
 
 // "Nearby check-up" tool: when a job is booked, offer the trip to members close by who are due.

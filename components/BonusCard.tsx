@@ -22,7 +22,7 @@ export default function BonusLines({ b, revenueEntered }: { b: BonusBreakdown; r
       {line(`5% from ${money(B.floor)} to ${money(B.target)}`, b.floorPart, !b.floorPart)}
       {line(`Reached ${money(B.target)}`, b.targetPart, !b.targetPart)}
       {line(`10% above ${money(B.target)}`, b.abovePart, !b.abovePart)}
-      {line(`Report items sold: ${b.itemsSold} × ${money(B.perItemSold)}`, b.itemsPart, !b.itemsPart)}
+      {line(`Report items paid: ${b.itemsSold} × ${money(B.perItemSold)}`, b.itemsPart, !b.itemsPart)}
       <div className="mt-1 flex justify-between gap-3 border-t border-line pt-1.5">
         <span className="font-bold">Bonus</span>
         <span className="font-display text-2xl font-bold text-success">{pay(b.total)}</span>
