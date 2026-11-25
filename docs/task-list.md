@@ -60,7 +60,9 @@ All wording is in `config/legal.ts`:
 - Town pages for Northern Kentucky and SE Indiana — only after the partners' licenses there are confirmed (Ohio service and town pages are built: `config/seo-pages.ts`).
 - Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
-- Phase 4: weekly tech bonus, partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).
+- Phase 4: partner scorecard, reminders (orange items at 3 and 5 months, yellow before the next check-up).
+- Weekly tech bonus: built (/office/bonuses for admin, "My bonus" in the tech app). Revenue is typed in from Housecall Pro each week until paid-job webhooks fill it in (phase 3). Run `supabase/migrations/20261125010000_tech_bonus.sql` once.
+  - To confirm with Nadav: a report item counts as "sold" when the customer approves it (not when it's paid), credited to the van of the tech who did the check-up.
 
 ## Ideas not adopted (need Nadav's OK first)
 

@@ -88,3 +88,14 @@ export function membershipPrice(plan: 'monthly' | 'yearly', systems: number) {
 export const spamGuard = {
   newLeadsPerHourPerConnection: 5,
 }
+
+// Weekly tech bonus, per van (confirmed in the partner deck, financial model v17).
+// Revenue = paid jobs before sales tax; membership fees don't count.
+export const techBonus = {
+  floor: 6700, // 5% of every dollar from here...
+  floorRate: 0.05,
+  target: 7500, // ...up to here; reaching it pays a flat bonus
+  targetBonus: 100,
+  aboveRate: 0.1, // 10% of every dollar above the target
+  perItemSold: 25, // every check-up report item sold, credited to the tech who found it
+}
