@@ -79,3 +79,12 @@ export function loadServiceArea(maxMiles: number) {
     .filter((r) => Number(r.miles_from_office) <= maxMiles)
     .map((r) => ({ zip: r.zip, city: r.city, state: r.state }))
 }
+
+// Map position of every zip code we know (centre of the zip), for the "nearby check-up" tool.
+export function loadZipPoints() {
+  return new Map(
+    readCsv('service_area.csv')
+      .filter((r) => r.lat && r.lng)
+      .map((r) => [r.zip, { lat: Number(r.lat), lng: Number(r.lng), city: r.city }]),
+  )
+}
