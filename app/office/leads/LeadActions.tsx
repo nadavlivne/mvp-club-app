@@ -23,6 +23,7 @@ export default function LeadActions({ id, status, notes }: { id: string; status:
           </button>
         )}
       </div>
+      <div className="text-xs font-semibold text-muted">Mark as:</div>
       <div className="flex flex-wrap gap-2">
         {open ? (
           <>
@@ -30,7 +31,7 @@ export default function LeadActions({ id, status, notes }: { id: string; status:
               Contacted
             </button>
             <button type="button" disabled={pending} onClick={() => start(() => setLeadStatus(id, 'joined'))} className={`${btn} bg-success text-white`}>
-              Joined — set up in Housecall Pro ✓
+              Joined (card set up in Housecall Pro)
             </button>
             <button type="button" disabled={pending} onClick={() => start(() => setLeadStatus(id, 'lost'))} className={`${btn} border border-edge bg-white`}>
               Not interested
@@ -40,7 +41,7 @@ export default function LeadActions({ id, status, notes }: { id: string; status:
           <>
             {status === 'contacted' && (
               <button type="button" disabled={pending} onClick={() => start(() => setLeadStatus(id, 'joined'))} className={`${btn} bg-success text-white`}>
-                Joined — set up in Housecall Pro ✓
+                Joined (card set up in Housecall Pro)
               </button>
             )}
             <button type="button" disabled={pending} onClick={() => start(() => setLeadStatus(id, 'reopen'))} className={`${btn} border border-edge bg-white`}>

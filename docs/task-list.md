@@ -57,6 +57,8 @@ All wording is in `config/legal.ts`:
 
 ## To build next
 
+- Partner view: a per-trade P&L screen partners can open themselves (needs paid jobs from Housecall Pro, phase 3).
+
 - Town pages for Northern Kentucky and SE Indiana — only after the partners' licenses there are confirmed (Ohio service and town pages are built: `config/seo-pages.ts`).
 - Add a real local line to each town page over time (a job done there, a review from there) so the pages aren't all alike.
 - Phase 3: Housecall Pro connection (after the demo), offline mode, security review with a developer.
@@ -71,6 +73,9 @@ All wording is in `config/legal.ts`:
   - To confirm with Nadav: a report item counts as "sold" when the customer approves it (not when it's paid), credited to the van of the tech who did the check-up.
 
 ## Ideas not adopted (need Nadav's OK first)
+
+- From the simulated video test (Nov 25): what a tech does when an area is tagged "Trade tech" and the licensed tech isn't on this visit (the check-up can't close until all three trades are done).
+- Who edits the price sheet: the sheet's How-to says trades are Viewer/Commenter; the MVP brief says each partner edits his own trade's prices.
 
 - Priority scheduling for members.
 - Free service call for members (now $19).

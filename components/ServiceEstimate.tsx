@@ -153,7 +153,7 @@ export default function ServiceEstimate({
               </button>
             )
           })}
-          <div className="text-center text-xs text-muted">Sample job · prices from the MVP price book</div>
+          {!token && <div className="text-center text-xs text-muted">Sample job · prices from the MVP price book</div>}
 
           <BottomBar>
             <div className="flex grow flex-col">
