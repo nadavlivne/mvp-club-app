@@ -31,7 +31,7 @@ export const zipOf = (address: string) => {
   return all.at(-1) ?? null
 }
 // "123 Main St., Apt 2, Cincinnati OH 45202" → "123 main st"
-const streetKey = (address: string) =>
+export const streetKey = (address: string) =>
   address
     .split(',')[0]
     .toLowerCase()

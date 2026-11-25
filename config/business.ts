@@ -113,3 +113,15 @@ export const nearbyCheckup = {
 
 // Spring = AC focus, fall = furnace focus (used in the wording of the offer).
 export const checkupSeasonFor = (date: Date) => (date.getMonth() >= 6 ? 'fall' : 'spring')
+
+// Follow-up on check-up report items the customer didn't approve (from the urgency ratings):
+// ORANGE (within 6 months): reminders at about 3 and 5 months after the report.
+// YELLOW (within 12 months): one reminder before the next check-up, about 5 months after the report.
+// RED items are offered on site; GREEN items are re-checked at the next visit (no reminder).
+export const reportReminders: Partial<Record<Rating, { days: number; label: string }[]>> = {
+  ORANGE: [
+    { days: 90, label: '3-month reminder' },
+    { days: 150, label: '5-month reminder' },
+  ],
+  YELLOW: [{ days: 150, label: 'Before the next check-up' }],
+}
