@@ -71,6 +71,9 @@ export default function TechToday(props: Props) {
             <Logo tagline="TECH" />
             {props.mode === 'db' && (
               <div className="flex items-center gap-4">
+                <Link href="/tech/bonus" className="flex h-11 items-center text-sm font-semibold text-sub">
+                  My bonus
+                </Link>
                 {props.isStaff && (
                   <Link href="/office" className="flex h-11 items-center text-sm font-semibold text-sub">
                     Office →
